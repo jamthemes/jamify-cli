@@ -1,0 +1,16 @@
+{
+  "target": "esnext",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "target": "es2018",
+    "module": "commonjs",
+    "lib": ["es2020", "dom"],
+    "declaration": false,
+    "outDir": "dist",
+    "strict": true,
+    "types": ["node"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src"]
+}

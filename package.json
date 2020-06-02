@@ -1,0 +1,58 @@
+{
+  "name": "jamify-cli",
+  "version": "0.0.1",
+  "description": "Help porting websites to a modern stack",
+  "main": "dist/index.js",
+  "bin": {
+    "jamify": "dist/index.js"
+  },
+  "scripts": {
+    "start": "nodemon --config ./nodemon_config.json --watch src/**/*.ts --watch .env --exec cross-env NODE_ENV=development ts-node src/index.ts",
+    "debug": "node --inspect-brk -r ts-node/register src/index.ts",
+    "build": "tsc -p .",
+    "semantic-release": "semantic-release"
+  },
+  "author": "Maximilian Torggler",
+  "license": "ISC",
+  "repository": {
+    "url": "https://github.com/jamthemes/jamify-cli.git"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.6",
+    "@types/yargs": "^15.0.5",
+    "cross-env": "^7.0.2",
+    "cz-conventional-changelog": "^3.2.0",
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4",
+    "semantic-release": "^17.0.8",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.3",
+    "@types/adm-zip": "^0.4.33",
+    "@types/babel__core": "^7.1.6",
+    "@types/fs-extra": "^8.1.0",
+    "@types/jsdom": "^16.1.1",
+    "@types/ncp": "^2.0.3",
+    "@types/recursive-readdir": "^2.2.0",
+    "@types/uuid": "^7.0.2"
+  },
+  "dependencies": {
+    "yargs": "^15.3.1",
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-syntax-jsx": "^7.8.3",
+    "@babel/plugin-transform-react-jsx": "^7.8.3",
+    "adm-zip": "^0.4.14",
+    "assetgraph": "^6.0.5",
+    "aws-sdk": "^2.674.0",
+    "deepmerge": "^4.2.2",
+    "del": "^5.1.0",
+    "dotenv": "^8.2.0",
+    "fs-extra": "^8.1.0",
+    "jsdom": "^16.2.0",
+    "jsdom-no-contextify": "^3.1.0",
+    "ncp": "^2.0.0",
+    "react-dom": "^15.4.1",
+    "recursive-readdir": "^2.2.2",
+    "urltools": "^0.4.1",
+    "uuid": "^7.0.2"
+  }
+}
