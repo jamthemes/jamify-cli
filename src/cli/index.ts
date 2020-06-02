@@ -1,4 +1,5 @@
 import yargs from 'yargs';
+import path from 'path';
 import {
   loadEnv,
   setupErrorHandling,
@@ -6,6 +7,18 @@ import {
   loadPackageJson,
 } from './util';
 import JamifyConverter, { JamifyConverterOptions } from '../jamify/workflow';
+
+const userCwd = process.cwd();
+
+function pathToAbsolute(val: string = '') {
+  if (!val) {
+    return '';
+  }
+  if (path.isAbsolute(val)) {
+    return val;
+  }
+  return path.join(userCwd, val);
+}
 
 export default async function setupCli() {
   // Load envs from .env for development
@@ -51,10 +64,10 @@ export default async function setupCli() {
     () => {},
     async (args: JamifyConverterOptions) => {
       const jamifyConverter = new JamifyConverter({
-        outFolder: args.outFolder,
+        outFolder: pathToAbsolute(args.outFolder),
         recursive: args.recursive,
         urls: args.urls,
-        sourceFolder: args.sourceFolder,
+        sourceFolder: pathToAbsolute(args.sourceFolder),
       });
       await jamifyConverter.run();
     },
