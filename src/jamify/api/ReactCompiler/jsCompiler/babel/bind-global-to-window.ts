@@ -1,3 +1,7 @@
+// TODO: Enable type checking and use "PluginItem"
+// type to correctly type this module!
+// @ts-nocheck
+
 const { types: t } = require('@babel/core');
 
 /**
@@ -6,7 +10,7 @@ const { types: t } = require('@babel/core');
  * `window.varname = 1`
  * of `function x() {}` becomes `window.x = function x() {}`
  */
-function BabelPlugin() {
+export default function BabelPlugin() {
   return {
     visitor: {
       FunctionDeclaration(path) {
@@ -35,7 +39,7 @@ function BabelPlugin() {
         const { node, parent } = path;
         if (parent.type === 'Program' && node.kind === 'var') {
           const allReplacingExpressions = node.declarations
-            .map(declaration => {
+            .map((declaration) => {
               return [
                 t.assignmentExpression(
                   '=',
@@ -55,5 +59,3 @@ function BabelPlugin() {
     },
   };
 }
-
-module.exports = BabelPlugin;

@@ -1,5 +1,5 @@
 import * as babel from '@babel/core';
-const transformLinksPlugin = require('./babel/plugin-prevent-umd.js');
+import transformLinksPlugin from './babel/plugin-prevent-umd.js';
 
 /**
  * Makes sure that UMD modules are always

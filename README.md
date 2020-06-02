@@ -1,6 +1,7 @@
 # Jamify
 
 **A tool to help porting websites to modern tech stacks**
+(project was extracted from the a bigger, internal monorepo)
 
 ## Using the CLI
 

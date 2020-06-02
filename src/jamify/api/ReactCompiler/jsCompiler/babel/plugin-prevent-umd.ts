@@ -1,3 +1,6 @@
+// TODO: Enable type checking and use "PluginItem"
+// type to correctly type this module!
+// @ts-nocheck
 const { types: t } = require('@babel/core');
 
 function processNode(node) {
@@ -16,7 +19,7 @@ function processNode(node) {
  * Makes sure that typeof module|define|exports
  * yields undefined
  */
-function BabelPlugin() {
+export default function BabelPlugin() {
   return {
     visitor: {
       BinaryExpression(path) {
@@ -26,5 +29,3 @@ function BabelPlugin() {
     },
   };
 }
-
-module.exports = BabelPlugin;
