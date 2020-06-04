@@ -17,6 +17,8 @@ npm link
 
 Now you can use it in your Shell of choice. Type `jamify --help` to get details about the usage.
 
+## Converting a site to Gatsby.js
+
 ## Developing Jamify
 
 When developing Jamify, first create a `.env` file in the root of your project:
@@ -31,6 +33,6 @@ Now run `npm run dev`
 
 Live-reload is enabled thanks to Nodemon.
 
-## Commit Standard
+### Commit Standard
 
 Please use the [commitizen CLI](https://github.com/commitizen/cz-cli) to create commit messages

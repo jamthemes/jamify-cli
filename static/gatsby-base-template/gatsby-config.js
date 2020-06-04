@@ -1,8 +1,8 @@
 module.exports = {
   siteMetadata: {
-    title: `This site was Jamified using www.jamify.site`,
+    title: `This site was Jamified using the mighty converter`,
     description: `This Gatsby project is the result of a process called Jamification, which takes any website and creates a static Jamstack site out of it.`,
-    author: `@jamify.site`,
+    author: `@jamthemes.io`,
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
@@ -13,8 +13,8 @@ module.exports = {
     //     path: `${__dirname}/src/images`,
     //   },
     // },
-    // `gatsby-transformer-sharp`,
-    // `gatsby-plugin-sharp`,
+    `gatsby-transformer-sharp`,
+    `gatsby-plugin-sharp`,
     // {
     //   resolve: `gatsby-plugin-manifest`,
     //   options: {
