@@ -71,7 +71,7 @@ export default async function setupCli() {
       });
       await jamifyConverter.run();
     },
-  );
+  ).demandCommand()
 
   yargs.version(packageJson.version).parse(cmdToUse);
 }
