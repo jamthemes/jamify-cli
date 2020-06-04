@@ -1,5 +1,5 @@
 import * as babel from '@babel/core';
-import bindGlobalsToWindowPlugin from './babel/bind-global-to-window.js';
+import bindGlobalsToWindowPlugin from './babel/bind-global-to-window';
 
 /**
  * Makes sure that UMD modules are always
