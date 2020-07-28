@@ -1,19 +1,19 @@
 {
   "name": "jamify",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "description": "Help porting websites to a modern stack",
   "main": "dist/index.js",
   "bin": {
     "jamify": "dist/index.js"
   },
   "scripts": {
-    "start": "nodemon --config ./nodemon_config.json --watch src --ext ts --ignore src/**/*.test.ts --exec ts-node src/index.ts",
-    "debug": "nodemon --inspect-brk -r ts-node/register src/index.ts",
+    "start": "cross-env NODE_ENV=development nodemon --config ./nodemon_config.json --watch src --ext ts --ignore src/**/*.test.ts --exec ts-node src/index.ts",
+    "debug": "cross-env NODE_ENV=development nodemon nodemon --inspect-brk -r ts-node/register src/index.ts",
     "build": "tsc -p .",
     "semantic-release": "semantic-release"
   },
   "author": "Maximilian Torggler",
-  "license": "GPL",
+  "license": "GPL-2.0",
   "repository": {
     "url": "https://github.com/jamthemes/jamify-cli.git"
   },
