@@ -14,7 +14,7 @@ You can also jump straight to [The Ultimate Template Porting Guide](https://www.
 Here's an example of a website we converted to Gatsby.js using the steps as documented in The Ultimate Template Porting Guide.
 
 - Original site: [Source](https://www.bootstrapdash.com/product/marshmallow/) | [Live Demo](https://www.bootstrapdash.com/demo/marshmallow/)
-- Gatsby.js starter: [Source](https://github.com/jamthemes/gatsby-starter-marshmallow) | [Live Demo](https://www.bootstrapdash.com/demo/marshmallow/)
+- Gatsby.js starter: [Source](https://github.com/jamthemes/gatsby-starter-marshmallow) | [Live Demo](https://gatsby-starter-marshmallow-showcase.vercel.app/)
 - Next.js starter: [Source](https://www.bootstrapdash.com/product/marshmallow/) | [Live Demo](https://next-starter-marshmallow-showcase.vercel.app/)
 
 ## Usage
