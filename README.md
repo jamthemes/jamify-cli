@@ -7,7 +7,7 @@
 Jamify let's you convert any website to a working Jamstack website by compiling it.
 Currently, only **Gatsby.js** is supported as a compile target. Thanks to Jamify, you can convert _mostly_ every existing website to Gatsby with ease. Going from Gatsby.js to Next.js isn't that difficult after that.
 
-You can also jump straight to [The Ultimate Template Porting Guide](https://www.notion.so/The-Ultimate-Template-Porting-Guide-1935e0b7824f4f42a4efa8b1ad89ead1)
+You can also jump straight to [The Ultimate Template Porting Guide](https://www.notion.so/The-Ultimate-Template-Porting-Guide-1935e0b7824f4f42a4efa8b1ad89ead1) for a detailed, uncensored step by step guide.
 
 ## Showcase
 
@@ -22,7 +22,7 @@ Here's an example of a website we converted to Gatsby.js using the steps as docu
 Try it out yourself now! Just like that:
 
 ```bash
-npm i -g jamify # or "yarn add -g jamify"
+npm i -g jamify # or "yarn global add jamify"
 jamify gatsby --urls https://html5up.net/uploads/demos/paradigm-shift/ -o ./new-gatsby-site
 ```
 
@@ -36,7 +36,11 @@ npm i
 gatsby develop
 ```
 
+...and navigate to http://localhost:8000/uploads/demos/paradigm-shift/ 🧙‍♂️
+
 For more options, type `jamify --help`
+
+Get creative and pick any template you like from sources like [HTML5UP](https://html5up.net/) or [Bootstrapdash](https://www.bootstrapdash.com/free-landing-page-templates/). **But always make sure the license allows for the intended usage!**
 
 **This is only the start of the journey.** For most sites, you will have a fully functioning Gatsby site now, but there are still some manual steps which need to be performed to reach an acceptable quality.
 Here you can find a somewhat extensive guide for porting website templates to Gatsby.js using Jamify:
