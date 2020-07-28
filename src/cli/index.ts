@@ -55,23 +55,25 @@ export default async function setupCli() {
     alias: 'r',
     type: 'boolean',
     describe:
-      ' If this is set to true, only the first url in the urls array is used and linked pages are followed recursively',
+      'If this is set to true, only the first url in the urls array is used and linked pages are followed recursively',
   });
 
-  yargs.command(
-    'gatsby',
-    'Convert a website to a GatsbyJS project',
-    () => {},
-    async (args: JamifyConverterOptions) => {
-      const jamifyConverter = new JamifyConverter({
-        outFolder: pathToAbsolute(args.outFolder),
-        recursive: args.recursive,
-        urls: args.urls,
-        sourceFolder: pathToAbsolute(args.sourceFolder),
-      });
-      await jamifyConverter.run();
-    },
-  ).demandCommand()
+  yargs
+    .command(
+      'gatsby',
+      'Convert a website to a GatsbyJS project',
+      () => {},
+      async (args: JamifyConverterOptions) => {
+        const jamifyConverter = new JamifyConverter({
+          outFolder: pathToAbsolute(args.outFolder),
+          recursive: args.recursive,
+          urls: args.urls,
+          sourceFolder: pathToAbsolute(args.sourceFolder),
+        });
+        await jamifyConverter.run();
+      },
+    )
+    .demandCommand();
 
   yargs.version(packageJson.version).parse(cmdToUse);
 }

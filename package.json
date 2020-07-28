@@ -1,5 +1,5 @@
 {
-  "name": "jamify-cli",
+  "name": "jamify",
   "version": "0.0.1",
   "description": "Help porting websites to a modern stack",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "semantic-release": "semantic-release"
   },
   "author": "Maximilian Torggler",
-  "license": "ISC",
+  "license": "GPL",
   "repository": {
     "url": "https://github.com/jamthemes/jamify-cli.git"
   },
