@@ -41,7 +41,7 @@
     "@babel/core": "^7.8.7",
     "@babel/plugin-syntax-jsx": "^7.8.3",
     "@babel/plugin-transform-react-jsx": "^7.8.3",
-    "adm-zip": "^0.4.14",
+    "adm-zip": "^0.5.1",
     "assetgraph": "^6.0.5",
     "aws-sdk": "^2.674.0",
     "deepmerge": "^4.2.2",
