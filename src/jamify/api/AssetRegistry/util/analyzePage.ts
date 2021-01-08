@@ -10,7 +10,7 @@ export interface AnalyzePageOptions {
 
 export default async function analyzePage({
   output,
-  recursive = true,
+  recursive = false,
   urls,
   sourceFolder,
 }: AnalyzePageOptions) {

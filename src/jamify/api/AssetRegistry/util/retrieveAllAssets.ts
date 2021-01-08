@@ -1,9 +1,8 @@
-// @ts-nocheck
+// TODO: Types for AssetGraph
+
 import del from 'del';
-import fs from 'fs';
 import { PageAsset, CollectedPage } from '../../../util/types';
 import populateWithLimit from './assetgraph/populate';
-import { promisify } from 'util';
 
 const AssetGraph = require('assetgraph');
 const urlTools = require('urltools');
@@ -63,11 +62,13 @@ function escapeRegex(input: string) {
  * to prevent that.
  * TODO: Open PR to fix that issue
  */
-function monkeyPatchHtmlAsset(htmlAsset) {
+function monkeyPatchHtmlAsset(htmlAsset: any) {
   const _createSourceMapForInlineScriptOrStylesheet = htmlAsset._createSourceMapForInlineScriptOrStylesheet.bind(
     htmlAsset,
   );
-  htmlAsset._createSourceMapForInlineScriptOrStylesheet = function (element) {
+  htmlAsset._createSourceMapForInlineScriptOrStylesheet = function (
+    element: any,
+  ) {
     const nonInlineAncestor = this.nonInlineAncestor;
     const sourceUrl =
       this.sourceUrl || (nonInlineAncestor ? nonInlineAncestor.url : this.url);
@@ -151,7 +152,7 @@ async function preprocessHtml({ assetGraph }: PreprocessHtml) {
 
 export default async function retrieveAllAssets({
   output,
-  recursive: recursiveParam = true,
+  recursive: recursiveParam = false,
   silent,
   urls,
   sourceFolder: sourceFolderParam,
@@ -166,18 +167,14 @@ export default async function retrieveAllAssets({
 
   const useUrl = !sourceFolder && urls && urls.length > 0;
 
-  const recursive = recursiveParam || !!sourceFolder;
+  const recursive = recursiveParam ?? !!sourceFolder;
 
   /**
-   * If the sites should be scraped recursively,
-   * make sure that only pages under the specified
+   * Make sure that only pages under the specified
    * start page's root (/<x>/<y>/root/...)
    * are included
    */
-  let startPageRegex =
-    recursive && useUrl
-      ? new RegExp(`${escapeRegex(normalizeUrl(urls![0]))}.*`)
-      : undefined;
+  let startPageRegex = new RegExp(`${escapeRegex(normalizeUrl(urls![0]))}.*`);
   console.log('startPageRegex', startPageRegex);
 
   const pretty = false;
@@ -276,7 +273,7 @@ export default async function retrieveAllAssets({
 
   for (const relation of assetGraph
     .findRelations({ type: 'HttpRedirect' })
-    .sort((a, b) => a.id - b.id)) {
+    .sort((a: any, b: any) => a.id - b.id)) {
     if (relation.from.isInitial) {
       assetGraph.warn(
         new Error(`${relation.from.url} redirected to ${relation.to.url}`),
@@ -289,13 +286,13 @@ export default async function retrieveAllAssets({
   const origins = new Set(
     assetGraph
       .findAssets({ isInitial: true })
-      .map((asset) => new urlModule.URL(asset.url).origin),
+      .map((asset: any) => new urlModule.URL(asset.url).origin),
   );
   if (origins.size > 1) {
     throw new Error(
-      `The pages to bring home must have the same origin, but saw multiple:\n  ${origins.join(
-        '\n  ',
-      )}`,
+      `The pages to bring home must have the same origin, but saw multiple:\n  ${[
+        ...origins,
+      ].join('\n  ')}`,
     );
   }
   const [origin] = Array.from(origins);
@@ -332,7 +329,7 @@ export default async function retrieveAllAssets({
 
   await assetGraph.moveAssets(
     { isInline: false, isLoaded: true },
-    (asset, assetGraph) => {
+    (asset: any, assetGraph: any) => {
       let baseUrl;
       if (asset.origin === origin) {
         baseUrl = outRoot;
@@ -408,7 +405,7 @@ export default async function retrieveAllAssets({
   /**
    * Bring asset into an easily consumable format
    */
-  function transformRelation(relation) {
+  function transformRelation(relation: any) {
     if (!relation.to.url) {
       return null;
     }
@@ -462,7 +459,7 @@ export default async function retrieveAllAssets({
     .map(transformRelation)
     .filter(Boolean);
 
-  function attributesToObject(attributes) {
+  function attributesToObject(attributes: any) {
     return [...attributes].reduce(
       (obj, val) => ({
         ...obj,
@@ -476,7 +473,7 @@ export default async function retrieveAllAssets({
    * Finds out if the element was referenced
    * on inside <body> or <head>
    */
-  function findElementSource(element) {
+  function findElementSource(element: any) {
     let currElem = element;
     while (currElem.parentElement) {
       currElem = currElem.parentElement;
@@ -502,7 +499,7 @@ export default async function retrieveAllAssets({
         },
       },
     })
-    .filter((rel) => rel.to.type)
+    .filter((rel: any) => rel.to.type)
     .map(transformRelation)
     .filter(Boolean);
 
@@ -520,7 +517,7 @@ export default async function retrieveAllAssets({
   });
   const allHtmlAssets = assetGraph.findAssets({ type: 'Html' });
 
-  const allUrls = allHtmlAssets.map((rel) => rel.url);
+  const allUrls = allHtmlAssets.map((rel: any) => rel.url);
 
   const allValidPageUrls = [...new Set(allUrls)];
 
@@ -565,7 +562,7 @@ export default async function retrieveAllAssets({
       const bodyAttributes = body ? attributesToObject(body.attributes) : {};
       const htmlAttributes = html ? attributesToObject(html.attributes) : {};
       const siteRelations = allPageAssets.filter(
-        (relation) => relation.fromUrl === page.url,
+        (relation: any) => relation.fromUrl === page.url,
       );
 
       const collectedPage: CollectedPage = {
@@ -586,7 +583,7 @@ export default async function retrieveAllAssets({
   await assetGraph.writeAssetsToDisc(
     {
       isLoaded: true,
-      url: (url) => url.startsWith(outRoot),
+      url: (url: string) => url.startsWith(outRoot),
     },
     outRoot,
     outRoot,
