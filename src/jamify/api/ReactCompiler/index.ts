@@ -9,6 +9,7 @@ import compileHtmlComponentToReact from './componentCompiler';
 import { getStaticDir } from '../../util/path';
 import UrlResolver from './UrlResolver';
 import JamifyLogger from '../jamify-logger';
+import SsgProjectCreator from '../SsgProjectCreator';
 
 interface ReactCompilerOptions {
   /**
@@ -19,6 +20,9 @@ interface ReactCompilerOptions {
    */
   outFolder: string;
   startPageUrl: string;
+  assetRegistry: AssetRegistry;
+  componentRegistry: ComponentRegistry;
+  ssgProjectCreator: SsgProjectCreator;
 }
 
 /**
@@ -26,20 +30,12 @@ interface ReactCompilerOptions {
  * into JSX files with correct imports
  */
 export default class ReactCompiler {
-  private assetRegistry: AssetRegistry;
-  private componentRegistry: ComponentRegistry;
   private options: ReactCompilerOptions;
   private pagesOutFolder: string = '';
   private componentsOutFolder: string = '';
   private urlResolver: UrlResolver;
 
-  constructor(
-    assetRegistry: AssetRegistry,
-    componentRegistry: ComponentRegistry,
-    options: ReactCompilerOptions,
-  ) {
-    this.assetRegistry = assetRegistry;
-    this.componentRegistry = componentRegistry;
+  constructor(options: ReactCompilerOptions) {
     this.options = options;
     const allUrls = this.urlsToAbsolute();
     JamifyLogger.log(
@@ -57,7 +53,7 @@ export default class ReactCompiler {
    */
   private urlsToAbsolute() {
     const urlObj = new URL(this.options.startPageUrl);
-    const allUrls = this.assetRegistry.getPages().map((page) => {
+    const allUrls = this.options.assetRegistry.getPages().map((page) => {
       const currUrlObj = new URL(page.url, urlObj.origin);
       const absoluteUrl = currUrlObj.href;
       page.url = absoluteUrl;
@@ -70,10 +66,15 @@ export default class ReactCompiler {
    * Create out folders
    */
   private createPaths() {
-    this.pagesOutFolder = path.join(this.options.outFolder, 'src/pages');
+    this.pagesOutFolder = path.join(
+      this.options.outFolder,
+      this.options.ssgProjectCreator.configuration.srcFolder,
+      'pages',
+    );
     this.componentsOutFolder = path.join(
       this.options.outFolder,
-      'src/components',
+      this.options.ssgProjectCreator.configuration.srcFolder,
+      'components',
     );
   }
 
@@ -93,7 +94,11 @@ export default class ReactCompiler {
     const PATH_TO_TEMPLATE_UTIL = path.join(getStaticDir(), 'template-util');
     await fsCopyDir(
       PATH_TO_TEMPLATE_UTIL,
-      path.join(this.options.outFolder, 'src', 'util'),
+      path.join(
+        this.options.outFolder,
+        this.options.ssgProjectCreator.configuration.srcFolder,
+        'util',
+      ),
     );
   }
 
@@ -105,7 +110,7 @@ export default class ReactCompiler {
    * they are usable in React apps
    */
   private async compileGlobalAssets() {
-    const pageGlobalJsAssets = this.assetRegistry.getPageAssets({
+    const pageGlobalJsAssets = this.options.assetRegistry.getPageAssets({
       type: 'HtmlScript',
     });
     await compileJavascript({ jsAssets: pageGlobalJsAssets });
@@ -116,14 +121,15 @@ export default class ReactCompiler {
       await fsMkDir(this.componentsOutFolder, { recursive: true });
     }
 
-    for (const component of this.componentRegistry.getComponents()) {
+    for (const component of this.options.componentRegistry.getComponents()) {
       await compileHtmlComponentToReact({
         component,
-        componentRegistry: this.componentRegistry,
+        componentRegistry: this.options.componentRegistry,
         componentsOutFolder: this.componentsOutFolder,
-        assetRegistry: this.assetRegistry,
+        assetRegistry: this.options.assetRegistry,
         pageUrl: this.options.startPageUrl,
         urlResolver: this.urlResolver,
+        ssgConfiguration: this.options.ssgProjectCreator.configuration,
       });
     }
   }
@@ -139,16 +145,17 @@ export default class ReactCompiler {
       'src/util/statikkCompatLayer.js',
     );
 
-    const pages = this.assetRegistry.getPages();
+    const pages = this.options.assetRegistry.getPages();
     for (const page of pages) {
       await compilePage({
         page,
-        assetRegistry: this.assetRegistry,
+        assetRegistry: this.options.assetRegistry,
         pagesOutFolder: this.pagesOutFolder,
-        componentRegistry: this.componentRegistry,
+        componentRegistry: this.options.componentRegistry,
         compatLayerPath: compatLayerAbsolutePath,
         startPageUrl: this.options.startPageUrl,
         urlResolver: this.urlResolver,
+        ssgConfiguration: this.options.ssgProjectCreator.configuration,
       });
     }
   }

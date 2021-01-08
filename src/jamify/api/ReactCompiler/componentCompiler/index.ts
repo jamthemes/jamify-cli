@@ -8,6 +8,7 @@ import { removeTrailingSemicolon } from '../jsxCompiler/util';
 import replaceInlineStyleSrc from '../jsxCompiler/replaceInlineStyleSrc';
 import { replaceAllLinksWithReactComponents } from '../jsxCompiler/replaceLinksInJSX';
 import UrlResolver from '../UrlResolver';
+import { SsgConfiguration } from '../../../util/types';
 
 interface CompileHtmlComponentToReactOptions {
   component: HtmlComponent;
@@ -17,6 +18,7 @@ interface CompileHtmlComponentToReactOptions {
   /** Needed to resolve URLs */
   pageUrl: string;
   urlResolver: UrlResolver;
+  ssgConfiguration: SsgConfiguration;
 }
 
 export default async function compileHtmlComponentToReact({
@@ -26,6 +28,7 @@ export default async function compileHtmlComponentToReact({
   componentsOutFolder,
   pageUrl,
   urlResolver,
+  ssgConfiguration,
 }: CompileHtmlComponentToReactOptions) {
   const htmlImageImports = createImports({
     assets: assetRegistry.getPageAssets({
@@ -51,6 +54,7 @@ export default async function compileHtmlComponentToReact({
       newJsx,
       pageUrl,
       urlResolver,
+      ssgConfiguration.renderLink,
     );
 
     // replace html images

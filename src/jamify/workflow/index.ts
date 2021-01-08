@@ -1,7 +1,9 @@
 import AssetRegistry from '../api/AssetRegistry';
 import ComponentRegistry from '../api/ComponentRegistry';
 import ReactCompiler from '../api/ReactCompiler';
-import GatsbySiteCreator from '../api/GatsbySiteCreator';
+import SsgProjectCreator from '../api/SsgProjectCreator';
+import gastbySsgConfig from '../util/ssg-config/gatsby-config';
+import nextSsgConfig from '../util/ssg-config/next-config';
 
 process.on('uncaughtException', (e) => {
   console.log('uncaughtException', e);
@@ -39,6 +41,7 @@ export interface JamifyConverterOptions {
    * components out of it
    */
   componentize?: boolean;
+  targetSsg: 'next' | 'gatsby';
 }
 
 export default class JamifyConverter {
@@ -49,6 +52,11 @@ export default class JamifyConverter {
   }
 
   public async run() {
+    const ssgConfig =
+      this.options.targetSsg === 'gatsby' ? gastbySsgConfig : nextSsgConfig;
+    const ssgProjectCreator = new SsgProjectCreator(ssgConfig, {
+      outFolder: this.options.outFolder,
+    });
     const assetRegistry = new AssetRegistry({
       outFolder: this.options.outFolder,
       urls: this.options.urls,
@@ -61,14 +69,15 @@ export default class JamifyConverter {
     if (this.options.componentize) {
       await componentRegistry.retrieve();
     }
-    const reactCompiler = new ReactCompiler(assetRegistry, componentRegistry, {
+    const reactCompiler = new ReactCompiler({
       outFolder: this.options.outFolder,
       startPageUrl: this.options.urls?.[0] || 'http://localhost',
+      assetRegistry,
+      componentRegistry,
+      ssgProjectCreator,
     });
     await reactCompiler.compile();
-    const gatsbySiteCreator = new GatsbySiteCreator(assetRegistry, {
-      outFolder: this.options.outFolder,
-    });
-    await gatsbySiteCreator.create();
+
+    await ssgProjectCreator.create();
   }
 }

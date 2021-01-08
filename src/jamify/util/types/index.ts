@@ -1,3 +1,5 @@
+import { template, types } from '@babel/core';
+
 export type PageAssetType =
   | 'HtmlStyle'
   | 'HtmlScript'
@@ -32,4 +34,25 @@ export interface CollectedPage {
   bodyAttributes: { [key: string]: string | undefined };
   assets: PageAsset[];
   htmlDocument: HTMLDocument;
+}
+
+export interface LinkRenderProps {
+  /** TODO: Correctly type with Babel types */
+  href: any;
+  children: any;
+  restAttributes: any[];
+}
+
+export type RenderLinkFn = (props: LinkRenderProps) => types.JSXElement;
+
+export interface SsgConfiguration {
+  name: string;
+  /**
+   * Will be inserted on top of each
+   * page component
+   */
+  globalPageImports: string[];
+  renderLink: RenderLinkFn;
+  renderHead: () => string;
+  srcFolder: string;
 }

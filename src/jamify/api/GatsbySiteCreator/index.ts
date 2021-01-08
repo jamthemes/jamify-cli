@@ -1,7 +1,5 @@
 import path from 'path';
 import AssetRegistry from '../AssetRegistry';
-import createGatsbySsr from './createGatsbySsr';
-import createGatsbyBrowserJs from './createGatsbyBrowserJs';
 import { fsCopyDir } from '../../util/fs';
 import addBaseTemplate from './addBaseTemplate';
 import { getStaticDir } from '../../util/path';

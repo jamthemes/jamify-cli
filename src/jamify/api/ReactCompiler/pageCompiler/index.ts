@@ -1,5 +1,5 @@
 import path from 'path';
-import { CollectedPage } from '../../../util/types';
+import { CollectedPage, SsgConfiguration } from '../../../util/types';
 import convertToJSX from '../jsxCompiler/convertToJSX';
 import AssetRegistry from '../../AssetRegistry';
 import createImports from '../jsxCompiler/createImports';
@@ -13,7 +13,7 @@ import ComponentRegistry from '../../ComponentRegistry';
 import { removeTrailingSemicolon } from '../jsxCompiler/util';
 import { replaceAllLinksWithReactComponents } from '../jsxCompiler/replaceLinksInJSX';
 import UrlResolver from '../UrlResolver';
-import createHelmet from './createHelmet';
+import createHead from './createHead';
 import JamifyLogger from '../../jamify-logger';
 
 interface CompilePageOptions {
@@ -28,6 +28,7 @@ interface CompilePageOptions {
    */
   compatLayerPath: string;
   urlResolver: UrlResolver;
+  ssgConfiguration: SsgConfiguration;
 }
 
 /**
@@ -45,9 +46,13 @@ export default async function compilePage({
   componentRegistry,
   startPageUrl,
   urlResolver,
+  ssgConfiguration,
 }: CompilePageOptions) {
   const { pageComponentName, pageFilePath } = urlToReactComponentName(page.url);
-
+  // TODO:
+  // - Include global SSG imports
+  // - Render SSG Head
+  // - Adjust Next.js <Link> render fn
   try {
     const fullFilePath = path.join(pagesOutFolder, pageFilePath);
 
@@ -60,7 +65,12 @@ export default async function compilePage({
     let jsx = convertToJSX(page.htmlDocument.body?.innerHTML || '');
 
     // replace links
-    jsx = await replaceAllLinksWithReactComponents(jsx, page.url, urlResolver);
+    jsx = await replaceAllLinksWithReactComponents(
+      jsx,
+      page.url,
+      urlResolver,
+      ssgConfiguration.renderLink,
+    );
 
     // Replace and import image assets
     const htmlImageImports = createImports({
@@ -140,10 +150,10 @@ export default async function compilePage({
 
     const reactComponentsToImport = importedComponents.map((cmp) => cmp.jsName);
 
-    // Create Helmet JSX
+    // Create Head JSX
     jsx = `
       <>
-        ${createHelmet(page)}
+        ${createHead(page)}
         ${jsx}
       </>
     `;

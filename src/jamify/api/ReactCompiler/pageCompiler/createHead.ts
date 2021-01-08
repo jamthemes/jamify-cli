@@ -23,7 +23,7 @@ function htmlAttributesToJsx(attributes: {
  * Creates the React <Helmet> contents
  * for a page based on it's header content
  */
-export default function createHelmet(page: CollectedPage) {
+export default function createHead(page: CollectedPage) {
   const bodyElemJsx = `<body ${htmlAttributesToJsx(page.bodyAttributes)}/>`;
   const htmlElemJsx = `<html ${htmlAttributesToJsx(page.htmlAttributes)}/>`;
 

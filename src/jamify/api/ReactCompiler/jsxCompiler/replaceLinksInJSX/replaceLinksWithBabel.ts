@@ -1,16 +1,11 @@
 import * as babel from '@babel/core';
+import { RenderLinkFn } from '../../../../util/types';
 import transformLinksPlugin from './babel-plugin';
 const pluginSyntaxJsx = require('@babel/plugin-syntax-jsx');
 
 interface ReplaceLinksInJSXParams {
   jsxStr: string;
-  /** e.g. "Link" */
-  newComponentName: string;
-  /** Name of property which will#
-   * get the href attribute,
-   * e.g 'to'
-   */
-  hrefPropName: string;
+  renderLink: RenderLinkFn;
   /**
    * Function to transform
    * the original href value into

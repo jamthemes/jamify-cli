@@ -68,6 +68,24 @@ export default async function setupCli() {
         recursive: args.recursive,
         urls: args.urls,
         sourceFolder: pathToAbsolute(args.sourceFolder),
+        targetSsg: 'gatsby',
+      });
+      await jamifyConverter.run();
+    },
+  );
+
+  yargs.command(
+    'next',
+    'Convert a website to a NextJS project',
+    () => {},
+    async (args: any) => {
+      const { default: JamifyConverter } = await import('../jamify/workflow');
+      const jamifyConverter = new JamifyConverter({
+        outFolder: pathToAbsolute(args.outFolder),
+        recursive: args.recursive,
+        urls: args.urls,
+        sourceFolder: pathToAbsolute(args.sourceFolder),
+        targetSsg: 'next',
       });
       await jamifyConverter.run();
     },
