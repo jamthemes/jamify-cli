@@ -29,7 +29,7 @@ const nextSsgConfig: SsgConfiguration = {
 import Router from "next/router";
 const navigate = Router.push.bind(Router);
   `,
-  createPageHead: ({ convertToJSX, page }) => {
+  createPageHead: ({ convertToJSX, page, children }) => {
     const headJsx = convertToJSX(page.restHeadContent)
       .replace('<div>', '')
       .replace('</div>', '');
@@ -37,6 +37,7 @@ const navigate = Router.push.bind(Router);
     return `
         <Head>
           ${headJsx}
+          ${children}
         </Head>
       `;
   },

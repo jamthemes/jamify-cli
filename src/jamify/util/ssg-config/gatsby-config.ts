@@ -22,7 +22,7 @@ const gastbySsgConfig: SsgConfiguration = {
   routeNavigateFunctionDefinition: `
 import { navigate } from 'gatsby';
   `,
-  createPageHead: ({ page, htmlAttributesToJsx, convertToJSX }) => {
+  createPageHead: ({ page, htmlAttributesToJsx, convertToJSX, children }) => {
     const bodyElemJsx = `<body ${htmlAttributesToJsx(page.bodyAttributes)}/>`;
     const htmlElemJsx = `<html ${htmlAttributesToJsx(page.htmlAttributes)}/>`;
 
@@ -34,6 +34,7 @@ import { navigate } from 'gatsby';
         <Helmet>
           ${htmlElemJsx}
           ${bodyElemJsx}
+          ${children}
           ${headJsx}
         </Helmet>
       `;

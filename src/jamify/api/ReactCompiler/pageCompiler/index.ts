@@ -133,12 +133,25 @@ export default async function compilePage({
       ...cssImportedAssets,
       ...scriptImports,
     ];
-    const identifierImportPaths = identifierImports.map(
+    let allImportedPaths = identifierImports.map(
       (importedAsset) => importedAsset.path,
     );
+
+    // CSS Imports for the HEAD
+    const cssAssets = page.assets.filter((asset) => asset.type === 'HtmlStyle');
+    const cssLinks = cssAssets
+      .map((asset) => `<link rel="stylesheet" href="${asset.originalUrl}" />`)
+      .join('\n');
+
+    allImportedPaths = [
+      ...allImportedPaths,
+      ...cssAssets.map((asset) => asset.path),
+    ];
+
+    // Remaining, non-imported assets
     const nonIdentifierImports = createImports({
       assets: page.assets.filter(
-        (asset) => !identifierImportPaths.includes(asset.path),
+        (asset) => !allImportedPaths.includes(asset.path),
       ),
       pageFolder: pageFullDirName,
       pagesOutFolder,
@@ -157,6 +170,7 @@ export default async function compilePage({
           page,
           convertToJSX,
           htmlAttributesToJsx,
+          children: cssLinks,
         })}
         ${jsx}
       </>

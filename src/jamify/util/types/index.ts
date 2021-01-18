@@ -49,6 +49,11 @@ interface CreatePageHeadParams {
   page: CollectedPage;
   convertToJSX: (html: string) => string;
   htmlAttributesToJsx: (obj: any) => string;
+  /**
+   * This needs to be inserted inside
+   * the Head component when implementing
+   */
+  children?: string;
 }
 
 interface SsgOnProjectCreatedParams {

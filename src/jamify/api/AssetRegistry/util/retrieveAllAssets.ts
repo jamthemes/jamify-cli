@@ -461,7 +461,8 @@ export default async function retrieveAllAssets({
   const relationsToDetach = ['HtmlStyle', 'HtmlScript'];
 
   const localPageRelations = [
-    ...relationsToDetach,
+    'HtmlStyle',
+    'HtmlScript',
     'HtmlImage',
     'CssAlphaImageLoader',
     'CssFontFaceSrc',
@@ -512,10 +513,15 @@ export default async function retrieveAllAssets({
   }
 
   // Get all remaining assets which need to be
-  // served statically to don't break the site
+  // served statically in order to not break the site.
+  // CSS will also be served statically
   const staticAssets = assetGraph
     .findRelations({
-      type: { $nin: [...localPageRelations] },
+      type: {
+        $nin: [
+          ...localPageRelations.filter((relType) => relType !== 'HtmlStyle'),
+        ],
+      },
       to: {
         type: {
           // Copy everything but HTML files
