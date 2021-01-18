@@ -23,6 +23,7 @@ interface ReactCompilerOptions {
   assetRegistry: AssetRegistry;
   componentRegistry: ComponentRegistry;
   ssgProjectCreator: SsgProjectCreator;
+  compatLayerPath: string;
 }
 
 /**
@@ -140,12 +141,6 @@ export default class ReactCompiler {
       await fsMkDir(this.pagesOutFolder, { recursive: true });
     }
 
-    const compatLayerAbsolutePath = path.join(
-      this.options.outFolder,
-      this.options.ssgProjectCreator.configuration.srcFolder,
-      'util/statikkCompatLayer.js',
-    );
-
     const pages = this.options.assetRegistry.getPages();
     for (const page of pages) {
       await compilePage({
@@ -153,7 +148,7 @@ export default class ReactCompiler {
         assetRegistry: this.options.assetRegistry,
         pagesOutFolder: this.pagesOutFolder,
         componentRegistry: this.options.componentRegistry,
-        compatLayerPath: compatLayerAbsolutePath,
+        compatLayerPath: this.options.compatLayerPath,
         startPageUrl: this.options.startPageUrl,
         urlResolver: this.urlResolver,
         ssgConfiguration: this.options.ssgProjectCreator.configuration,

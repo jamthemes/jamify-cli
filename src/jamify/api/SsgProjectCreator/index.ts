@@ -1,11 +1,12 @@
 import path from 'path';
-import { fsCopyDir } from '../../util/fs';
+import { fsReadFile, fsWriteFile } from '../../util/fs';
 import { getStaticDir } from '../../util/path';
 import { SsgConfiguration } from '../../util/types';
 import addBaseTemplate from './addBaseTemplate';
 
 interface SsgProjectCreatorOptions {
   outFolder: string;
+  compatLayerPath: string;
 }
 
 /**
@@ -25,12 +26,26 @@ export default class SsgProjectCreator {
     this.options = options;
   }
 
+  private async createCompatLayer() {
+    const compatLayerTemplate = (
+      await fsReadFile(
+        path.join(getStaticDir(), 'template-util/jamify-compat-layer.js'),
+      )
+    ).toString();
+    const compatLayerContent = compatLayerTemplate
+      .replace(
+        '// <--NAVIGATE_FN-->',
+        this.configuration.routeNavigateFunctionDefinition,
+      )
+      .replace(
+        '<--SSG_HTML_SELECTOR-->',
+        this.configuration.htmlContainerSelector,
+      );
+    await fsWriteFile(this.options.compatLayerPath, compatLayerContent);
+  }
+
   public async create() {
-    const PATH_TO_TEMPLATE_UTIL = path.join(getStaticDir(), 'template-util');
-    await fsCopyDir(
-      PATH_TO_TEMPLATE_UTIL,
-      path.join(this.options.outFolder, this.configuration.srcFolder, 'util'),
-    );
+    await this.createCompatLayer();
     await addBaseTemplate(this.options.outFolder, this.configuration.name);
   }
 }

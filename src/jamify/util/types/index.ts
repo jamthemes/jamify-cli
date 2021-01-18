@@ -56,4 +56,6 @@ export interface SsgConfiguration {
   headComponentName: string;
   srcFolder: string;
   publicFolder: string;
+  htmlContainerSelector: string;
+  routeNavigateFunctionDefinition: string;
 }

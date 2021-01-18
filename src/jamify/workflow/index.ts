@@ -1,3 +1,4 @@
+import path from 'path';
 import AssetRegistry from '../api/AssetRegistry';
 import ComponentRegistry from '../api/ComponentRegistry';
 import ReactCompiler from '../api/ReactCompiler';
@@ -54,8 +55,16 @@ export default class JamifyConverter {
   public async run() {
     const ssgConfig =
       this.options.targetSsg === 'gatsby' ? gastbySsgConfig : nextSsgConfig;
+
+    const compatLayerAbsolutePath = path.join(
+      this.options.outFolder,
+      ssgConfig.srcFolder,
+      'util/jamify-compat-layer.js',
+    );
+
     const ssgProjectCreator = new SsgProjectCreator(ssgConfig, {
       outFolder: this.options.outFolder,
+      compatLayerPath: compatLayerAbsolutePath,
     });
     const assetRegistry = new AssetRegistry({
       outFolder: this.options.outFolder,
@@ -76,6 +85,7 @@ export default class JamifyConverter {
       assetRegistry,
       componentRegistry,
       ssgProjectCreator,
+      compatLayerPath: compatLayerAbsolutePath,
     });
     await reactCompiler.compile();
 

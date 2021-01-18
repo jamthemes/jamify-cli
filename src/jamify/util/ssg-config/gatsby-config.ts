@@ -19,6 +19,10 @@ const gastbySsgConfig: SsgConfiguration = {
   },
   srcFolder: 'src/',
   publicFolder: 'static',
+  htmlContainerSelector: '#___gatsby',
+  routeNavigateFunctionDefinition: `
+import { navigate } from 'gatsby';
+  `,
 };
 
 export default gastbySsgConfig;

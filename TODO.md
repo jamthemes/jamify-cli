@@ -11,3 +11,8 @@
 ## Gatsby
 
 - Update version in preset's package.json
+
+## Other
+
+- prettify resulting page.js files
+- remove all hints of statikk/jamthemes

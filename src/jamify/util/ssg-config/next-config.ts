@@ -25,6 +25,11 @@ const nextSsgConfig: SsgConfiguration = {
   },
   srcFolder: '',
   publicFolder: 'public',
+  htmlContainerSelector: '#__next',
+  routeNavigateFunctionDefinition: `
+import Router from "next/router";
+const navigate = Router.push.bind(Router);
+  `,
 };
 
 export default nextSsgConfig;

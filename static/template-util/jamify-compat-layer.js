@@ -1,4 +1,6 @@
-import { navigate } from 'gatsby';
+// <--NAVIGATE_FN-->
+
+const ssgHtmlContainerSelector = '<--SSG_HTML_SELECTOR-->';
 
 let eventsToPrevent = ['DOMContentLoaded', 'load', 'readystatechange'];
 let documentReadyState = 'loading';
@@ -79,7 +81,7 @@ export function before() {
   function simulateReload() {
     // Remove all elements which were dynamicall added to the body element
     const bodyElemsToRemove = document.querySelectorAll(
-      'body > :not(script):not(#___gatsby)',
+      `body > :not(script):not(${ssgHtmlContainerSelector})`,
     );
     bodyElemsToRemove.forEach((elem) => elem.remove());
     // $("body").off()
