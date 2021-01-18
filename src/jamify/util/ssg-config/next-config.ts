@@ -7,7 +7,6 @@ const nextSsgConfig: SsgConfiguration = {
     'import Head from "next/Head"',
   ],
   name: 'next',
-  headComponentName: 'Head',
   renderLink: ({ href, children, restAttributes }) => {
     const cmpIndentifier = t.jsxIdentifier('Link');
     const newLinkAttr = t.jsxAttribute(t.jsxIdentifier('href'), href);
@@ -30,6 +29,17 @@ const nextSsgConfig: SsgConfiguration = {
 import Router from "next/router";
 const navigate = Router.push.bind(Router);
   `,
+  createPageHead: ({ convertToJSX, page }) => {
+    const headJsx = convertToJSX(page.restHeadContent)
+      .replace('<div>', '')
+      .replace('</div>', '');
+
+    return `
+        <Head>
+          ${headJsx}
+        </Head>
+      `;
+  },
 };
 
 export default nextSsgConfig;

@@ -7,7 +7,6 @@ const gastbySsgConfig: SsgConfiguration = {
     'import { Helmet } from "react-helmet"',
   ],
   name: 'gatsby',
-  headComponentName: 'Helmet',
   renderLink: ({ href, children, restAttributes }) => {
     const cmpIndentifier = t.jsxIdentifier('Link');
     const newLinkAttr = t.jsxAttribute(t.jsxIdentifier('to'), href);
@@ -23,6 +22,22 @@ const gastbySsgConfig: SsgConfiguration = {
   routeNavigateFunctionDefinition: `
 import { navigate } from 'gatsby';
   `,
+  createPageHead: ({ page, htmlAttributesToJsx, convertToJSX }) => {
+    const bodyElemJsx = `<body ${htmlAttributesToJsx(page.bodyAttributes)}/>`;
+    const htmlElemJsx = `<html ${htmlAttributesToJsx(page.htmlAttributes)}/>`;
+
+    const headJsx = convertToJSX(page.restHeadContent)
+      .replace('<div>', '')
+      .replace('</div>', '');
+
+    return `
+        <Helmet>
+          ${htmlElemJsx}
+          ${bodyElemJsx}
+          ${headJsx}
+        </Helmet>
+      `;
+  },
 };
 
 export default gastbySsgConfig;

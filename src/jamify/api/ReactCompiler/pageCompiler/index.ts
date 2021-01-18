@@ -6,14 +6,16 @@ import createImports from '../jsxCompiler/createImports';
 import replaceImgSrc from '../jsxCompiler/replaceImgSrc';
 import replaceInlineStyleSrc from '../jsxCompiler/replaceInlineStyleSrc';
 import createReactPageComponent from './createReactPageComponent';
-import { urlToReactComponentName } from '../../../util/compilation/react';
+import {
+  htmlAttributesToJsx,
+  urlToReactComponentName,
+} from '../../../util/compilation/react';
 import { fsWriteFile, fsExists, fsMkDir } from '../../../util/fs';
 import replaceHtmlComponentsInJsx from '../jsxCompiler/replaceHtmlComponentsInJSX';
 import ComponentRegistry from '../../ComponentRegistry';
 import { removeTrailingSemicolon } from '../jsxCompiler/util';
 import { replaceAllLinksWithReactComponents } from '../jsxCompiler/replaceLinksInJSX';
 import UrlResolver from '../UrlResolver';
-import createHead from './createHead';
 import JamifyLogger from '../../jamify-logger';
 
 interface CompilePageOptions {
@@ -151,7 +153,11 @@ export default async function compilePage({
     // Create Head JSX
     jsx = `
       <>
-        ${createHead(page, ssgConfiguration.headComponentName)}
+        ${ssgConfiguration.createPageHead({
+          page,
+          convertToJSX,
+          htmlAttributesToJsx,
+        })}
         ${jsx}
       </>
     `;

@@ -50,3 +50,21 @@ export function urlToReactComponentName(fullUrl: string) {
     ssgUrl,
   };
 }
+
+function htmlAttrNameToJsx(attrName: string) {
+  const map: { [key: string]: string | undefined } = {
+    for: 'htmlFor',
+    class: 'className',
+  };
+  return map[attrName] ?? attrName;
+}
+
+export function htmlAttributesToJsx(attributes: {
+  [key: string]: string | undefined;
+}) {
+  return Object.keys(attributes).reduce((str, key) => {
+    const val = attributes[key];
+    const attrName = htmlAttrNameToJsx(key);
+    return `${str} ${attrName}="${val}"`;
+  }, '');
+}

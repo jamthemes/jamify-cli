@@ -45,6 +45,17 @@ export interface LinkRenderProps {
 
 export type RenderLinkFn = (props: LinkRenderProps) => types.JSXElement;
 
+interface CreatePageHeadParams {
+  page: CollectedPage;
+  convertToJSX: (html: string) => string;
+  htmlAttributesToJsx: (obj: any) => string;
+}
+
+interface SsgOnProjectCreatedParams {
+  config: SsgConfiguration;
+  projectRoot: string;
+}
+
 export interface SsgConfiguration {
   name: string;
   /**
@@ -53,9 +64,10 @@ export interface SsgConfiguration {
    */
   globalPageImports: string[];
   renderLink: RenderLinkFn;
-  headComponentName: string;
   srcFolder: string;
   publicFolder: string;
   htmlContainerSelector: string;
   routeNavigateFunctionDefinition: string;
+  createPageHead: (params: CreatePageHeadParams) => string;
+  onProjectCreated?: (p: SsgOnProjectCreatedParams) => any;
 }

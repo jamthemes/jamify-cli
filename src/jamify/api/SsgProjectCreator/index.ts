@@ -47,5 +47,13 @@ export default class SsgProjectCreator {
   public async create() {
     await this.createCompatLayer();
     await addBaseTemplate(this.options.outFolder, this.configuration.name);
+    if (this.configuration.onProjectCreated) {
+      await Promise.resolve(
+        this.configuration.onProjectCreated({
+          projectRoot: this.options.outFolder,
+          config: this.configuration,
+        }),
+      );
+    }
   }
 }
