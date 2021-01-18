@@ -2,9 +2,12 @@ import { types as t } from '@babel/core';
 import { SsgConfiguration } from '../types';
 
 const gastbySsgConfig: SsgConfiguration = {
-  globalPageImports: [],
+  globalPageImports: [
+    'import { Link } from "gatsby"',
+    'import { Helmet } from "react-helmet"',
+  ],
   name: 'gatsby',
-  renderHead: () => '',
+  headComponentName: 'Helmet',
   renderLink: ({ href, children, restAttributes }) => {
     const cmpIndentifier = t.jsxIdentifier('Link');
     const newLinkAttr = t.jsxAttribute(t.jsxIdentifier('to'), href);
@@ -15,6 +18,7 @@ const gastbySsgConfig: SsgConfiguration = {
     return element;
   },
   srcFolder: 'src/',
+  publicFolder: 'static',
 };
 
 export default gastbySsgConfig;

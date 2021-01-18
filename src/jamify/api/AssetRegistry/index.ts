@@ -1,14 +1,24 @@
 import path from 'path';
-import { CollectedPage, PageAsset, PageAssetType } from '../../util/types';
+import {
+  CollectedPage,
+  PageAsset,
+  PageAssetType,
+  SsgConfiguration,
+} from '../../util/types';
 import analyzePage from './util/analyzePage';
 import { fsMkDir, fsCopyFile } from '../../util/fs';
 import del from 'del';
 
 interface AssetRegistryOptions {
-  sourceFolder?: string;
   urls?: string[];
   outFolder: string;
   recursive?: boolean;
+  ssgConfiguration: SsgConfiguration;
+  /**
+   * Instead of an URL, a folder path
+   * can be used
+   */
+  sourceFolder?: string;
 }
 
 interface GetPageAssetsFilter {
@@ -55,8 +65,15 @@ export default class AssetRegistry {
   }
 
   private createPaths() {
-    this.assetsOutFolder = path.join(this.options.outFolder, 'src/assets');
-    this.staticAssetsOutFolder = path.join(this.options.outFolder, 'static');
+    this.assetsOutFolder = path.join(
+      this.options.outFolder,
+      this.options.ssgConfiguration.srcFolder,
+      'assets',
+    );
+    this.staticAssetsOutFolder = path.join(
+      this.options.outFolder,
+      this.options.ssgConfiguration.publicFolder,
+    );
     this.temporaryAssetsOutFolder = path.join(
       this.options.outFolder,
       '.assets_temp',
@@ -80,7 +97,7 @@ export default class AssetRegistry {
    */
   public getPageAssets({ type }: GetPageAssetsFilter = {}) {
     const filtered = type
-      ? this.assets.filter(asset => asset.type === type)
+      ? this.assets.filter((asset) => asset.type === type)
       : this.assets;
     return filtered;
   }
@@ -92,7 +109,6 @@ export default class AssetRegistry {
     const result = await analyzePage({
       output: this.temporaryAssetsOutFolder,
       urls: this.options.urls,
-      sourceFolder: this.options.sourceFolder,
       recursive: this.options.recursive,
     });
     this.pages = result.pages;
@@ -109,7 +125,7 @@ export default class AssetRegistry {
   private updateAssetPath(oldAssetPath: string, newAssetPath: string) {
     const assetSources = [
       ...this.assets,
-      ...this.pages.map(page => page.assets).flat(),
+      ...this.pages.map((page) => page.assets).flat(),
     ];
     for (const asset of assetSources) {
       if (asset.path === oldAssetPath) {

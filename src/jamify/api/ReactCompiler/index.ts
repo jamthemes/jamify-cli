@@ -142,7 +142,8 @@ export default class ReactCompiler {
 
     const compatLayerAbsolutePath = path.join(
       this.options.outFolder,
-      'src/util/statikkCompatLayer.js',
+      this.options.ssgProjectCreator.configuration.srcFolder,
+      'util/statikkCompatLayer.js',
     );
 
     const pages = this.options.assetRegistry.getPages();

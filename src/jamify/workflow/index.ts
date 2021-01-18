@@ -62,6 +62,7 @@ export default class JamifyConverter {
       urls: this.options.urls,
       sourceFolder: this.options.sourceFolder,
       recursive: this.options.recursive,
+      ssgConfiguration: ssgConfig,
     });
     await assetRegistry.retrieve();
     const componentRegistry = new ComponentRegistry(assetRegistry);

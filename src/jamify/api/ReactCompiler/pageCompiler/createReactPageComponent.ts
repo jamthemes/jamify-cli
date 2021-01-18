@@ -8,6 +8,7 @@ interface CreateReactPageComponentParams {
   reactComponentsToImport: string[];
   reactComponentName: string;
   compatLayerRelativePath: string;
+  ssgSpecificImports: string[];
 }
 
 /**
@@ -23,13 +24,14 @@ export default function createReactPageComponent({
   reactComponentsToImport,
   identifierImports,
   nonIdentifierImports,
+  ssgSpecificImports,
 }: CreateReactPageComponentParams) {
   const scriptAssets = identifierImports.filter(
-    asset => asset.type === 'HtmlScript',
+    (asset) => asset.type === 'HtmlScript',
   );
   let imports = identifierImports
     .map(
-      asset =>
+      (asset) =>
         `import ${asset.importIdentifier} from "${asset.relativeImportPath}"`,
     )
     .join('\n');
@@ -37,23 +39,22 @@ export default function createReactPageComponent({
   imports +=
     '\n' +
     nonIdentifierImports
-      .map(asset => `import '${asset.relativeImportPath}';`)
+      .map((asset) => `import '${asset.relativeImportPath}';`)
       .join('\n');
 
   imports +=
     '\n' +
     reactComponentsToImport
-      .map(cmpName => `import ${cmpName} from '../components/${cmpName}.js';`)
+      .map((cmpName) => `import ${cmpName} from '../components/${cmpName}.js';`)
       .join('\n');
 
   const bodyJs = scriptAssets
-    .map(script => `${script.importIdentifier}();`)
+    .map((script) => `${script.importIdentifier}();`)
     .join('\n');
 
   const jsxFileContent = `
     import React, { useEffect } from "react"
-    import { Helmet } from "react-helmet"
-    import { Link } from "gatsby"
+    ${ssgSpecificImports.join('\n')}
     import { after, before } from "${compatLayerRelativePath}"
     ${imports}
 

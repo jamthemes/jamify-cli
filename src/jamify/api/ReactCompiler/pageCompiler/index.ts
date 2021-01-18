@@ -50,8 +50,6 @@ export default async function compilePage({
 }: CompilePageOptions) {
   const { pageComponentName, pageFilePath } = urlToReactComponentName(page.url);
   // TODO:
-  // - Include global SSG imports
-  // - Render SSG Head
   // - Adjust Next.js <Link> render fn
   try {
     const fullFilePath = path.join(pagesOutFolder, pageFilePath);
@@ -153,7 +151,7 @@ export default async function compilePage({
     // Create Head JSX
     jsx = `
       <>
-        ${createHead(page)}
+        ${createHead(page, ssgConfiguration.headComponentName)}
         ${jsx}
       </>
     `;
@@ -166,6 +164,7 @@ export default async function compilePage({
       reactComponentName: pageComponentName,
       compatLayerRelativePath,
       reactComponentsToImport,
+      ssgSpecificImports: ssgConfiguration.globalPageImports,
     });
 
     await fsWriteFile(fullFilePath, componentContent);

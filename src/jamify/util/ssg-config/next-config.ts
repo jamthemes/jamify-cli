@@ -2,20 +2,29 @@ import { types as t } from '@babel/core';
 import { SsgConfiguration } from '../types';
 
 const nextSsgConfig: SsgConfiguration = {
-  globalPageImports: [],
+  globalPageImports: [
+    'import Link from "next/Link"',
+    'import Head from "next/Head"',
+  ],
   name: 'next',
-  renderHead: () => '',
+  headComponentName: 'Head',
   renderLink: ({ href, children, restAttributes }) => {
-    // TODO: adjust to Next.js link
     const cmpIndentifier = t.jsxIdentifier('Link');
-    const newLinkAttr = t.jsxAttribute(t.jsxIdentifier('to'), href);
+    const newLinkAttr = t.jsxAttribute(t.jsxIdentifier('href'), href);
     const allAttributes = [...restAttributes, newLinkAttr];
     const opening = t.jsxOpeningElement(cmpIndentifier, allAttributes, false);
     const closing = t.jsxClosingElement(cmpIndentifier);
-    const element = t.jsxElement(opening, closing, children, true);
+    const aElem = t.jsxElement(
+      t.jsxOpeningElement(t.jsxIdentifier('a'), [], false),
+      t.jsxClosingElement(t.jsxIdentifier('a')),
+      children,
+      false,
+    );
+    const element = t.jsxElement(opening, closing, [aElem], false);
     return element;
   },
   srcFolder: '',
+  publicFolder: 'public',
 };
 
 export default nextSsgConfig;

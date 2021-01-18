@@ -1,4 +1,4 @@
-import { template, types } from '@babel/core';
+import { types } from '@babel/core';
 
 export type PageAssetType =
   | 'HtmlStyle'
@@ -53,6 +53,7 @@ export interface SsgConfiguration {
    */
   globalPageImports: string[];
   renderLink: RenderLinkFn;
-  renderHead: () => string;
+  headComponentName: string;
   srcFolder: string;
+  publicFolder: string;
 }
