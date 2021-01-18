@@ -17,6 +17,7 @@ export interface PageAsset {
   type: PageAssetType;
   /** Orginal URL relative to the website's root */
   originalUrl: string;
+  rootRelativeUrl: string;
   /** Absolute URL where the asset was downloaded */
   path: string;
   /** Determine if the asset

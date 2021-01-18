@@ -1,7 +1,6 @@
 ## Next.js support
 
 - For Next.js, dynamically change `<body>` and `<html>` props on route changes, CSR only (very hacky fml)
-- Load CSS inside `<Head>`
 - Load images directly from public folder OR include next/image inside template
 
 ## Gatsby

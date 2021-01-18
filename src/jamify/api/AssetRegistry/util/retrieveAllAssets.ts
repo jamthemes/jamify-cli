@@ -447,10 +447,16 @@ export default async function retrieveAllAssets({
     const elementSource = relation.node
       ? findElementSource(relation.node)
       : undefined;
+    const rootRelativeUrl = urlTools.buildRootRelativeUrl(
+      outRoot,
+      relation.to.url,
+      outRoot,
+    );
 
     return {
       type: relation.type,
       originalUrl: relation.href,
+      rootRelativeUrl,
       path: urlTools.fileUrlToFsPath(relation.to.url),
       source: elementSource,
       fromUrl,
@@ -514,13 +520,11 @@ export default async function retrieveAllAssets({
 
   // Get all remaining assets which need to be
   // served statically in order to not break the site.
-  // CSS will also be served statically
+  // Currently, everything but JS is served statically.
   const staticAssets = assetGraph
     .findRelations({
       type: {
-        $nin: [
-          ...localPageRelations.filter((relType) => relType !== 'HtmlStyle'),
-        ],
+        $nin: ['HtmlScript'],
       },
       to: {
         type: {

@@ -3,8 +3,8 @@ import { CollectedPage, SsgConfiguration } from '../../../util/types';
 import convertToJSX from '../jsxCompiler/convertToJSX';
 import AssetRegistry from '../../AssetRegistry';
 import createImports from '../jsxCompiler/createImports';
-import replaceImgSrc from '../jsxCompiler/replaceImgSrc';
-import replaceInlineStyleSrc from '../jsxCompiler/replaceInlineStyleSrc';
+// import replaceImgSrc from '../jsxCompiler/replaceImgSrc';
+// import replaceInlineStyleSrc from '../jsxCompiler/replaceInlineStyleSrc';
 import createReactPageComponent from './createReactPageComponent';
 import {
   htmlAttributesToJsx,
@@ -72,42 +72,46 @@ export default async function compilePage({
       ssgConfiguration.renderLink,
     );
 
+    // --> RIGHT NOW images are loaded directly from the SSG's static folder
+    // TODO: Evaluate if loading images inline with 'imports' can
+    // be beneficial for some SSGs. If so, the below code can be used.
+
     // Replace and import image assets
-    const htmlImageImports = createImports({
-      assets: assetRegistry.getPageAssets({
-        type: 'HtmlImage',
-      }),
-      pageFolder: pageFullDirName,
-      pagesOutFolder,
-    });
-    const cssImageImports = createImports({
-      assets: assetRegistry.getPageAssets({
-        type: 'CssImage',
-      }),
-      pageFolder: pageFullDirName,
-      pagesOutFolder,
-    });
-    const allImageImports = [...htmlImageImports, ...cssImageImports];
+    // const htmlImageImports = createImports({
+    //   assets: assetRegistry.getPageAssets({
+    //     type: 'HtmlImage',
+    //   }),
+    //   pageFolder: pageFullDirName,
+    //   pagesOutFolder,
+    // });
+    // const cssImageImports = createImports({
+    //   assets: assetRegistry.getPageAssets({
+    //     type: 'CssImage',
+    //   }),
+    //   pageFolder: pageFullDirName,
+    //   pagesOutFolder,
+    // });
+    // const allImageImports = [...htmlImageImports, ...cssImageImports];
 
-    const {
-      newJsx: jsxReplacedHtmlImages,
-      importedAssets: htmlImportedAssets,
-    } = await replaceImgSrc({
-      jsxStr: jsx,
-      assets: allImageImports,
-      componentRegistry,
-    });
+    // const {
+    //   newJsx: jsxReplacedHtmlImages,
+    //   importedAssets: htmlImportedAssets,
+    // } = await replaceImgSrc({
+    //   jsxStr: jsx,
+    //   assets: allImageImports,
+    //   componentRegistry,
+    // });
 
-    jsx = jsxReplacedHtmlImages;
+    // jsx = jsxReplacedHtmlImages;
 
-    const {
-      newJsx: jsxReplacedCssImages,
-      importedAssets: cssImportedAssets,
-    } = await replaceInlineStyleSrc({
-      jsxStr: jsx,
-      assets: allImageImports,
-    });
-    jsx = jsxReplacedCssImages;
+    // const {
+    //   newJsx: jsxReplacedCssImages,
+    //   importedAssets: cssImportedAssets,
+    // } = await replaceInlineStyleSrc({
+    //   jsxStr: jsx,
+    //   assets: allImageImports,
+    // });
+    // jsx = jsxReplacedCssImages;
     // Replace and import components
     const {
       newJsx: jsxWithComponents,
@@ -129,8 +133,8 @@ export default async function compilePage({
       pageFolder: pageFullDirName,
     });
     const identifierImports = [
-      ...htmlImportedAssets,
-      ...cssImportedAssets,
+      // ...htmlImportedAssets,
+      // ...cssImportedAssets,
       ...scriptImports,
     ];
     let allImportedPaths = identifierImports.map(
@@ -140,7 +144,9 @@ export default async function compilePage({
     // CSS Imports for the HEAD
     const cssAssets = page.assets.filter((asset) => asset.type === 'HtmlStyle');
     const cssLinks = cssAssets
-      .map((asset) => `<link rel="stylesheet" href="${asset.originalUrl}" />`)
+      .map(
+        (asset) => `<link rel="stylesheet" href="${asset.rootRelativeUrl}" />`,
+      )
       .join('\n');
 
     allImportedPaths = [
@@ -149,13 +155,16 @@ export default async function compilePage({
     ];
 
     // Remaining, non-imported assets
-    const nonIdentifierImports = createImports({
+    // WAS used for CSS but now CSS is loaded
+    // from the static folder
+    let nonIdentifierImports = createImports({
       assets: page.assets.filter(
         (asset) => !allImportedPaths.includes(asset.path),
       ),
       pageFolder: pageFullDirName,
       pagesOutFolder,
     });
+    nonIdentifierImports = [];
 
     const compatLayerRelativePath = path
       .relative(pageFullDirName, compatLayerPath)
