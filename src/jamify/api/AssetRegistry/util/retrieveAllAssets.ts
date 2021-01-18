@@ -35,6 +35,17 @@ interface PreprocessHtml {
   assetGraph: any;
 }
 
+function makeRelationRootRelative(relation: any, outRoot: string) {
+  if (relation.to.url) {
+    const rootRelativeHref = urlTools.buildRootRelativeUrl(
+      outRoot,
+      relation.to.url,
+      outRoot,
+    );
+    relation.href = rootRelativeHref;
+  }
+}
+
 /**
  * Removes trailing /index.<ext>,
  * so that those URIs can be
@@ -169,12 +180,14 @@ export default async function retrieveAllAssets({
 
   const recursive = recursiveParam ?? !!sourceFolder;
 
+  const baseUrl = normalizeUrl(urls![0]);
+
   /**
    * Make sure that only pages under the specified
    * start page's root (/<x>/<y>/root/...)
    * are included
    */
-  let startPageRegex = new RegExp(`${escapeRegex(normalizeUrl(urls![0]))}.*`);
+  let startPageRegex = new RegExp(`${escapeRegex(baseUrl)}.*`);
   console.log('startPageRegex', startPageRegex);
 
   const pretty = false;
@@ -247,9 +260,25 @@ export default async function retrieveAllAssets({
   } else {
     noFollowRelationTypes.push('HtmlAlternateLink');
     followRelationsQuery = {
-      type: {
-        $nin: noFollowRelationTypes,
-      },
+      $or: [
+        {
+          type: {
+            $nin: noFollowRelationTypes,
+          },
+        },
+        {
+          type: { $nin: resourceHintTypes },
+          crossorigin: false,
+          to: {
+            url: {
+              $regex: startPageRegex,
+            },
+            type: {
+              $nin: ['Html'],
+            },
+          },
+        },
+      ],
     };
   }
 
@@ -268,6 +297,8 @@ export default async function retrieveAllAssets({
   await assetGraph.populate({
     followRelations: followRelationsQuery,
   });
+
+  const htmlRelations = assetGraph.findRelations({});
 
   await assetGraph.checkIncompatibleTypes();
 
@@ -392,14 +423,7 @@ export default async function retrieveAllAssets({
     type: 'HtmlImage',
   });
   for (const relation of allImageRelations) {
-    if (relation.to.url) {
-      const rootRelativeHref = urlTools.buildRootRelativeUrl(
-        outRoot,
-        relation.to.url,
-        outRoot,
-      );
-      relation.href = rootRelativeHref;
-    }
+    makeRelationRootRelative(relation, outRoot);
   }
 
   /**
@@ -500,7 +524,10 @@ export default async function retrieveAllAssets({
       },
     })
     .filter((rel: any) => rel.to.type)
-    .map(transformRelation)
+    .map((relation: any) => {
+      makeRelationRootRelative(relation, outRoot);
+      return transformRelation(relation);
+    })
     .filter(Boolean);
 
   // Extract the needed data from the HTML pages,
@@ -509,12 +536,6 @@ export default async function retrieveAllAssets({
   // Then, get all Script, Style and Image relations
   // and assign them to the HTML page where
   // they were required
-  const allLocalLinkRelations = assetGraph.findRelations({
-    type: 'HtmlAnchor',
-    hrefType: {
-      $in: ['relative'],
-    },
-  });
   const allHtmlAssets = assetGraph.findAssets({ type: 'Html' });
 
   const allUrls = allHtmlAssets.map((rel: any) => rel.url);
@@ -530,6 +551,12 @@ export default async function retrieveAllAssets({
   }
 
   // Make all local link relations root ('/') relative
+  // const allLocalLinkRelations = assetGraph.findRelations({
+  //   type: 'HtmlAnchor',
+  //   hrefType: {
+  //     $in: ['relative'],
+  //   },
+  // });
   // for (const localLink of allLocalLinkRelations) {
   // const isExternal = isUrlExternal(localLink.href, pageUrl);
   // const isHashUrl = localLink.href.startsWith('#');
