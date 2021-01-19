@@ -151,22 +151,22 @@ export default class AssetRegistry {
         console.log(`Failed creating file ${pageAsset.path}.`);
       }
     }
-    // Copy remaining assets to out/static
-    for (const remainingAsset of this.staticAssets) {
+    // Copy static assets to out/static
+    for (const staticAsset of this.staticAssets) {
       try {
         const pathWithoutRoot = path.relative(
           this.temporaryAssetsOutFolder,
-          remainingAsset.path,
+          staticAsset.path,
         );
         const pageAssetPath = path.join(
           this.staticAssetsOutFolder,
           pathWithoutRoot,
         );
         await fsMkDir(path.dirname(pageAssetPath), { recursive: true });
-        await fsCopyFile(remainingAsset.path, pageAssetPath);
-        this.updateAssetPath(remainingAsset.path, pageAssetPath);
+        await fsCopyFile(staticAsset.path, pageAssetPath);
+        this.updateAssetPath(staticAsset.path, pageAssetPath);
       } catch {
-        console.log(`Failed creating file ${remainingAsset.path}.`);
+        console.log(`Failed creating file ${staticAsset.path}.`);
       }
     }
 

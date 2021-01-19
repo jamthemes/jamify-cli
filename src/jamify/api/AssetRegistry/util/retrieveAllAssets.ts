@@ -200,7 +200,7 @@ export default async function retrieveAllAssets({
   }
 
   const assetGraph = new AssetGraph(
-    sourceFolder ? { root: sourceFolder } : undefined,
+    sourceFolder ? { root: sourceFolder } : { root: baseUrl },
   );
   const teepeeHeaders = assetGraph.teepee.headers;
   for (const header of headers) {
@@ -245,15 +245,11 @@ export default async function retrieveAllAssets({
           type: {
             $nin: noFollowRelationTypes,
           },
+          crossorigin: false,
         },
         {
           type: { $nin: resourceHintTypes },
           crossorigin: false,
-          to: {
-            url: {
-              $regex: startPageRegex,
-            },
-          },
         },
       ],
     };
@@ -265,14 +261,12 @@ export default async function retrieveAllAssets({
           type: {
             $nin: noFollowRelationTypes,
           },
+          crossorigin: false,
         },
         {
           type: { $nin: resourceHintTypes },
           crossorigin: false,
           to: {
-            url: {
-              $regex: startPageRegex,
-            },
             type: {
               $nin: ['Html'],
             },
@@ -466,21 +460,10 @@ export default async function retrieveAllAssets({
 
   const relationsToDetach = ['HtmlStyle', 'HtmlScript'];
 
-  const localPageRelations = [
-    'HtmlStyle',
-    'HtmlScript',
-    'HtmlImage',
-    'CssAlphaImageLoader',
-    'CssFontFaceSrc',
-    'CssBehavior',
-    'CssImage',
-    'CssImport',
-    'CssSourceMappingUrl',
-    'CssSourceUrl',
-    'CssUrlTokenRelation',
-  ];
+  // Only JS will be directly imported
+  const localPageRelations = ['HtmlScript'];
 
-  // Retrieve all needed relations before
+  // Retrieve all scripts before
   // they are detached, so that they can
   // later on be assigned to a HTML page
   const allPageAssets = assetGraph
@@ -518,8 +501,6 @@ export default async function retrieveAllAssets({
     return '';
   }
 
-  // Get all remaining assets which need to be
-  // served statically in order to not break the site.
   // Currently, everything but JS is served statically.
   const staticAssets = assetGraph
     .findRelations({
@@ -620,10 +601,9 @@ export default async function retrieveAllAssets({
   await assetGraph.writeAssetsToDisc(
     {
       isLoaded: true,
-      url: (url: string) => url.startsWith(outRoot),
     },
     outRoot,
-    outRoot,
+    baseUrl,
   );
 
   if (!silent) {
