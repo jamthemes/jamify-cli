@@ -8,7 +8,6 @@
 
 ## Other
 
-- Make sure assets aren't saved twice (/assets + /public)
 - If there's only one subdirectory, move everything to /pages
 - prettify resulting page.js files
 - remove all hints of statikk/jamthemes

@@ -24,6 +24,12 @@ export interface PageAsset {
    * was referenced in the head
    * or the body */
   source?: 'body' | 'head';
+  /**
+   * If true, that file should
+   * be served statically
+   */
+  isStatic?: boolean;
+  wasSaved?: boolean;
 }
 
 export interface CollectedPage {

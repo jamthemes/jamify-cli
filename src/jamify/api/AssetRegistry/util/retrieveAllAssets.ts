@@ -26,8 +26,7 @@ interface RetrieveAllAssetsOptions {
 }
 
 interface RetrieveAllAssetsData {
-  staticAssets: PageAsset[];
-  allPageAssets: PageAsset[];
+  allAssets: PageAsset[];
   pages: CollectedPage[];
 }
 
@@ -161,6 +160,34 @@ async function preprocessHtml({ assetGraph }: PreprocessHtml) {
   }
 }
 
+function attributesToObject(attributes: any) {
+  return [...attributes].reduce(
+    (obj, val) => ({
+      ...obj,
+      [val.nodeName]: val.nodeValue,
+    }),
+    {},
+  );
+}
+
+/**
+ * Finds out if the element was referenced
+ * on inside <body> or <head>
+ */
+function findElementSource(element: any) {
+  let currElem = element;
+  while (currElem.parentElement) {
+    currElem = currElem.parentElement;
+    if (currElem.tagName === 'HEAD') {
+      return 'head';
+    }
+    if (currElem.tagName === 'BODY') {
+      return 'body';
+    }
+  }
+  return '';
+}
+
 export default async function retrieveAllAssets({
   output,
   recursive: recursiveParam = false,
@@ -292,8 +319,6 @@ export default async function retrieveAllAssets({
     followRelations: followRelationsQuery,
   });
 
-  const htmlRelations = assetGraph.findRelations({});
-
   await assetGraph.checkIncompatibleTypes();
 
   for (const relation of assetGraph
@@ -348,13 +373,14 @@ export default async function retrieveAllAssets({
 
   // Make sure that JavaScriptStaticUrl relations don't end up as relative
   // because fromUrl and toUrl are outside assetGraph.root:
-  assetGraph.root = outRoot;
+  // assetGraph.root = outRoot;
 
   await preprocessHtml({ assetGraph });
 
+  // Creates local file URLs from web URLs
   await assetGraph.moveAssets(
     { isInline: false, isLoaded: true },
-    (asset: any, assetGraph: any) => {
+    (asset: any) => {
       let baseUrl;
       if (asset.origin === origin) {
         baseUrl = outRoot;
@@ -363,12 +389,13 @@ export default async function retrieveAllAssets({
           asset.port ? `:${asset.port}` : ''
         }/`;
       }
-      return new urlModule.URL(
+      const newUrl = new urlModule.URL(
         `${asset.path.replace(/^\//, '')}${asset.baseName || 'index'}${
           asset.extension || asset.defaultExtension
         }`,
         baseUrl,
-      ).href;
+      );
+      return newUrl.href;
     },
   );
 
@@ -423,7 +450,7 @@ export default async function retrieveAllAssets({
   /**
    * Bring asset into an easily consumable format
    */
-  function transformRelation(relation: any) {
+  function transformRelation(relation: any, isStatic: boolean = false) {
     if (!relation.to.url) {
       return null;
     }
@@ -455,6 +482,7 @@ export default async function retrieveAllAssets({
       source: elementSource,
       fromUrl,
       fileProtocolUrl: relation.to.url,
+      isStatic,
     };
   }
 
@@ -463,43 +491,15 @@ export default async function retrieveAllAssets({
   // Only JS will be directly imported
   const localPageRelations = ['HtmlScript'];
 
-  // Retrieve all scripts before
+  // Retrieve all assets before
   // they are detached, so that they can
   // later on be assigned to a HTML page
-  const allPageAssets = assetGraph
+  const nonStaticAssets = assetGraph
     .findRelations({
       type: { $in: localPageRelations },
     })
-    .map(transformRelation)
+    .map((rel: any) => transformRelation(rel, false))
     .filter(Boolean);
-
-  function attributesToObject(attributes: any) {
-    return [...attributes].reduce(
-      (obj, val) => ({
-        ...obj,
-        [val.nodeName]: val.nodeValue,
-      }),
-      {},
-    );
-  }
-
-  /**
-   * Finds out if the element was referenced
-   * on inside <body> or <head>
-   */
-  function findElementSource(element: any) {
-    let currElem = element;
-    while (currElem.parentElement) {
-      currElem = currElem.parentElement;
-      if (currElem.tagName === 'HEAD') {
-        return 'head';
-      }
-      if (currElem.tagName === 'BODY') {
-        return 'body';
-      }
-    }
-    return '';
-  }
 
   // Currently, everything but JS is served statically.
   const staticAssets = assetGraph
@@ -517,9 +517,11 @@ export default async function retrieveAllAssets({
     .filter((rel: any) => rel.to.type)
     .map((relation: any) => {
       makeRelationRootRelative(relation, outRoot);
-      return transformRelation(relation);
+      return transformRelation(relation, true);
     })
     .filter(Boolean);
+
+  const allAssets = [...nonStaticAssets, ...staticAssets];
 
   // Extract the needed data from the HTML pages,
   // namely the body content, the head content
@@ -579,7 +581,7 @@ export default async function retrieveAllAssets({
       const restBodyContent = body ? body.innerHTML : '';
       const bodyAttributes = body ? attributesToObject(body.attributes) : {};
       const htmlAttributes = html ? attributesToObject(html.attributes) : {};
-      const siteRelations = allPageAssets.filter(
+      const siteRelations = allAssets.filter(
         (relation: any) => relation.fromUrl === page.url,
       );
 
@@ -626,8 +628,7 @@ export default async function retrieveAllAssets({
 
   const resObj = {
     pages: pagesWithAssets,
-    staticAssets: arrayUnique<PageAsset>(staticAssets, 'path'),
-    allPageAssets: arrayUnique<PageAsset>(allPageAssets, 'path'),
+    allAssets: arrayUnique<PageAsset>(allAssets, 'path'),
   };
   return resObj;
 }

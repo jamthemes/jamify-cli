@@ -39,13 +39,6 @@ export default class AssetRegistry {
    * All assets as a flat list
    */
   private assets: PageAsset[] = [];
-  /**
-   * Assets which need to be
-   * served statically in
-   * the resulting pages
-   * webroot
-   */
-  private staticAssets: PageAsset[] = [];
 
   /**
    * Assets used in source
@@ -68,7 +61,7 @@ export default class AssetRegistry {
     this.assetsOutFolder = path.join(
       this.options.outFolder,
       this.options.ssgConfiguration.srcFolder,
-      'assets',
+      'include',
     );
     this.staticAssetsOutFolder = path.join(
       this.options.outFolder,
@@ -112,8 +105,7 @@ export default class AssetRegistry {
       recursive: this.options.recursive,
     });
     this.pages = result.pages;
-    this.assets = result.allPageAssets;
-    this.staticAssets = result.staticAssets;
+    this.assets = result.allAssets;
 
     await this.copyAssets();
   }
@@ -134,40 +126,68 @@ export default class AssetRegistry {
     }
   }
 
+  private async saveStaticAsset(staticAsset: PageAsset) {
+    try {
+      const pathWithoutRoot = path.relative(
+        this.temporaryAssetsOutFolder,
+        staticAsset.path,
+      );
+      const pageAssetPath = path.join(
+        this.staticAssetsOutFolder,
+        pathWithoutRoot,
+      );
+      await fsMkDir(path.dirname(pageAssetPath), { recursive: true });
+      await fsCopyFile(staticAsset.path, pageAssetPath);
+      this.updateAssetPath(staticAsset.path, pageAssetPath);
+    } catch {
+      console.log(`Failed creating file ${staticAsset.path}.`);
+    }
+  }
+
+  private async savePageAsset(pageAsset: PageAsset) {
+    try {
+      const pathWithoutRoot = path.relative(
+        this.temporaryAssetsOutFolder,
+        pageAsset.path,
+      );
+      const pageAssetPath = path.join(this.assetsOutFolder, pathWithoutRoot);
+      await fsMkDir(path.dirname(pageAssetPath), { recursive: true });
+      await fsCopyFile(pageAsset.path, pageAssetPath);
+      this.updateAssetPath(pageAsset.path, pageAssetPath);
+    } catch {
+      console.log(`Failed creating file ${pageAsset.path}.`);
+    }
+  }
+
   private async copyAssets() {
     // Copy page assets to out/src/assets
 
-    for (const pageAsset of this.assets) {
-      try {
-        const pathWithoutRoot = path.relative(
-          this.temporaryAssetsOutFolder,
-          pageAsset.path,
-        );
-        const pageAssetPath = path.join(this.assetsOutFolder, pathWithoutRoot);
-        await fsMkDir(path.dirname(pageAssetPath), { recursive: true });
-        await fsCopyFile(pageAsset.path, pageAssetPath);
-        this.updateAssetPath(pageAsset.path, pageAssetPath);
-      } catch {
-        console.log(`Failed creating file ${pageAsset.path}.`);
+    // First, retrieve all assets from each page
+    // and save them
+    for (const page of this.pages) {
+      for (const asset of page.assets) {
+        if (asset.isStatic) {
+          await this.saveStaticAsset(asset);
+        } else {
+          await this.savePageAsset(asset);
+        }
+        asset.wasSaved = true;
       }
     }
-    // Copy static assets to out/static
-    for (const staticAsset of this.staticAssets) {
-      try {
-        const pathWithoutRoot = path.relative(
-          this.temporaryAssetsOutFolder,
-          staticAsset.path,
-        );
-        const pageAssetPath = path.join(
-          this.staticAssetsOutFolder,
-          pathWithoutRoot,
-        );
-        await fsMkDir(path.dirname(pageAssetPath), { recursive: true });
-        await fsCopyFile(staticAsset.path, pageAssetPath);
-        this.updateAssetPath(staticAsset.path, pageAssetPath);
-      } catch {
-        console.log(`Failed creating file ${staticAsset.path}.`);
+
+    // After that, retrieve all assets which weren't saved
+    // during the process before and save them to the
+    // static folder
+    for (const asset of this.assets) {
+      if (asset.wasSaved) {
+        continue;
       }
+      if (asset.isStatic) {
+        await this.saveStaticAsset(asset);
+      } else {
+        await this.savePageAsset(asset);
+      }
+      asset.wasSaved = true;
     }
 
     // Delete out/assets
