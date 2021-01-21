@@ -2,15 +2,6 @@
 // and correctly type this module!
 // @ts-nocheck
 
-/** @preserve
- *  Copyright (c) 2014, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree. An additional grant
- *  of patent rights can be found in the PATENTS file in the same directory.
- *
- */
 'use strict';
 
 /**
@@ -273,6 +264,15 @@ function isNumeric(input) {
     input !== null &&
     (typeof input === 'number' || parseInt(input, 10) == input)
   );
+}
+
+/**
+ * Sanitizes numbers:
+ * - Removes trailing 0s to prevent "Octal literals are not allowed in strict mode"
+ */
+function sanitizeNumericValue(value: number | string) {
+  let newValue = value.toString().replace(new RegExp('^0+', 'g'), '');
+  return newValue;
 }
 
 var createElement;
@@ -642,7 +642,7 @@ HTMLtoJSX.prototype = {
 
         // Numeric values should be output as {123} not "123"
         if (isNumeric(attribute.value)) {
-          result += '={' + attribute.value + '}';
+          result += '={' + sanitizeNumericValue(attribute.value) + '}';
         } else if (attribute.value.length > 0) {
           result += '="' + attribute.value.replace(/"/gm, '&quot;') + '"';
         } else if (attribute.value.length === 0 && attribute.name === 'alt') {
@@ -747,7 +747,7 @@ StyleParser.prototype = {
   toJSXValue: function (value) {
     if (isNumeric(value)) {
       // If numeric, no quotes
-      return value;
+      return sanitizeNumericValue(value);
     } else {
       // Probably a string, wrap it in quotes
       return "'" + value.replace(/'/g, '"') + "'";

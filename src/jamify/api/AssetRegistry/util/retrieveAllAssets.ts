@@ -147,7 +147,15 @@ async function preprocessHtml({ assetGraph }: PreprocessHtml) {
 
   for (const scriptAsset of scriptAssets) {
     if (scriptAsset.to) {
-      await scriptAsset.to.load();
+      try {
+        await scriptAsset.to.load();
+      } catch (e) {
+        console.log(
+          'Error loading script (you can ignore this):',
+          scriptAsset.to,
+          e,
+        );
+      }
     }
   }
 
@@ -256,50 +264,65 @@ export default async function retrieveAllAssets({
 
   const anchorTypes = ['HtmlAnchor', 'SvgAnchor', 'HtmlMetaRefresh'];
 
-  const noFollowRelationTypes = [
-    ...anchorTypes,
-    ...resourceHintTypes,
-    'HtmlOpenGraph',
-    'RssChannelLink',
-    'JsonUrl',
-  ];
-
   let followRelationsQuery;
+  // if (recursive) {
+  //   followRelationsQuery = {
+  //     $or: [
+  //       {
+  //         type: {
+  //           $nin: noFollowRelationTypes,
+  //         },
+  //         crossorigin: false,
+  // to: { url: { $regex: startPageRegex } },
+  //       },
+  //       {
+  //         type: { $nin: resourceHintTypes },
+  //         crossorigin: false,
+  //       },
+  //     ],
+  //   };
+  // } else {
+  //   noFollowRelationTypes.push('HtmlAlternateLink');
+  //   followRelationsQuery = {
+  //     $or: [
+  //       {
+  //         type: {
+  //           $nin: noFollowRelationTypes,
+  //         },
+  //         crossorigin: false,
+  //       },
+  //       {
+  //         type: { $nin: resourceHintTypes },
+  //         crossorigin: false,
+  //         to: {
+  //           type: {
+  //             $nin: ['Html'],
+  //           },
+  //         },
+  //       },
+  //     ],
+  //   };
+  // }
+
   if (recursive) {
     followRelationsQuery = {
-      $or: [
-        {
-          type: {
-            $nin: noFollowRelationTypes,
-          },
-          crossorigin: false,
-        },
-        {
-          type: { $nin: resourceHintTypes },
-          crossorigin: false,
-        },
-      ],
+      type: {
+        $nin: resourceHintTypes,
+      },
+      crossorigin: false,
+      to: { url: { $regex: startPageRegex } },
     };
   } else {
-    noFollowRelationTypes.push('HtmlAlternateLink');
     followRelationsQuery = {
-      $or: [
-        {
-          type: {
-            $nin: noFollowRelationTypes,
-          },
-          crossorigin: false,
-        },
-        {
-          type: { $nin: resourceHintTypes },
-          crossorigin: false,
-          to: {
-            type: {
-              $nin: ['Html'],
-            },
-          },
-        },
-      ],
+      type: {
+        $nin: [...resourceHintTypes, ...anchorTypes],
+      },
+      crossorigin: false,
+      // to: {
+      //   type: {
+      //     $nin: ['Html'],
+      //   },
+      // },
     };
   }
 
@@ -613,10 +636,10 @@ export default async function retrieveAllAssets({
   }
 
   // Delete source folder (if exists) to save space
-  if (sourceFolder) {
-    console.log('Delete source folder', sourceFolder);
-    await del(sourceFolder, { force: true });
-  }
+  // if (sourceFolder) {
+  //   console.log('Delete source folder', sourceFolder);
+  //   await del(sourceFolder, { force: true });
+  // }
 
   function arrayUnique<T>(array: T[], field: string): T[] {
     return [...new Set(array.map((array) => (array as any)[field]))].map(

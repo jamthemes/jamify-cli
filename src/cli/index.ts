@@ -76,7 +76,7 @@ export default async function setupCli() {
 
   yargs.command(
     'next',
-    'Convert a website to a NextJS project',
+    'Convert a website to a Next.js project',
     () => {},
     async (args: any) => {
       const { default: JamifyConverter } = await import('../jamify/workflow');

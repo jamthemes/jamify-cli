@@ -9,14 +9,14 @@ function processNode(node) {
   }
 
   const name = node.argument.name;
-  const replaceIdentifiers = ['module', 'define', 'exports'];
+  const replaceIdentifiers = ['module', 'define', 'exports', 'require'];
   if (replaceIdentifiers.includes(name)) {
     node.argument = t.identifier('undefined');
   }
 }
 
 /**
- * Makes sure that typeof module|define|exports
+ * Makes sure that typeof module|define|exports|require
  * yields undefined
  */
 export default function BabelPlugin() {

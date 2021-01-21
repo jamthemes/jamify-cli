@@ -51,129 +51,125 @@ export default async function compilePage({
   ssgConfiguration,
 }: CompilePageOptions) {
   const { pageComponentName, pageFilePath } = urlToReactComponentName(page.url);
-  // TODO:
-  // - Adjust Next.js <Link> render fn
-  try {
-    const fullFilePath = path.join(pagesOutFolder, pageFilePath);
 
-    const pageFullDirName = path.dirname(fullFilePath);
-    if (!(await fsExists(pageFullDirName))) {
-      await fsMkDir(pageFullDirName, { recursive: true });
-    }
+  const fullFilePath = path.join(pagesOutFolder, pageFilePath);
 
-    // Convert html -> JSX
-    let jsx = convertToJSX(page.htmlDocument.body?.innerHTML || '');
+  const pageFullDirName = path.dirname(fullFilePath);
+  if (!(await fsExists(pageFullDirName))) {
+    await fsMkDir(pageFullDirName, { recursive: true });
+  }
 
-    // replace links
-    jsx = await replaceAllLinksWithReactComponents(
-      jsx,
-      page.url,
-      urlResolver,
-      ssgConfiguration.renderLink,
-    );
+  // Convert html -> JSX
+  let jsx = convertToJSX(page.htmlDocument.body?.innerHTML || '');
 
-    // --> RIGHT NOW images are loaded directly from the SSG's static folder
-    // TODO: Evaluate if loading images inline with 'imports' can
-    // be beneficial for some SSGs. If so, the below code can be used.
+  // replace links
+  jsx = await replaceAllLinksWithReactComponents(
+    jsx,
+    page.url,
+    urlResolver,
+    ssgConfiguration.renderLink,
+  );
 
-    // Replace and import image assets
-    // const htmlImageImports = createImports({
-    //   assets: assetRegistry.getPageAssets({
-    //     type: 'HtmlImage',
-    //   }),
-    //   pageFolder: pageFullDirName,
-    //   pagesOutFolder,
-    // });
-    // const cssImageImports = createImports({
-    //   assets: assetRegistry.getPageAssets({
-    //     type: 'CssImage',
-    //   }),
-    //   pageFolder: pageFullDirName,
-    //   pagesOutFolder,
-    // });
-    // const allImageImports = [...htmlImageImports, ...cssImageImports];
+  // --> RIGHT NOW images are loaded directly from the SSG's static folder
+  // TODO: Evaluate if loading images inline with 'imports' can
+  // be beneficial for some SSGs. If so, the below code can be used.
 
-    // const {
-    //   newJsx: jsxReplacedHtmlImages,
-    //   importedAssets: htmlImportedAssets,
-    // } = await replaceImgSrc({
-    //   jsxStr: jsx,
-    //   assets: allImageImports,
-    //   componentRegistry,
-    // });
+  // Replace and import image assets
+  // const htmlImageImports = createImports({
+  //   assets: assetRegistry.getPageAssets({
+  //     type: 'HtmlImage',
+  //   }),
+  //   pageFolder: pageFullDirName,
+  //   pagesOutFolder,
+  // });
+  // const cssImageImports = createImports({
+  //   assets: assetRegistry.getPageAssets({
+  //     type: 'CssImage',
+  //   }),
+  //   pageFolder: pageFullDirName,
+  //   pagesOutFolder,
+  // });
+  // const allImageImports = [...htmlImageImports, ...cssImageImports];
 
-    // jsx = jsxReplacedHtmlImages;
+  // const {
+  //   newJsx: jsxReplacedHtmlImages,
+  //   importedAssets: htmlImportedAssets,
+  // } = await replaceImgSrc({
+  //   jsxStr: jsx,
+  //   assets: allImageImports,
+  //   componentRegistry,
+  // });
 
-    // const {
-    //   newJsx: jsxReplacedCssImages,
-    //   importedAssets: cssImportedAssets,
-    // } = await replaceInlineStyleSrc({
-    //   jsxStr: jsx,
-    //   assets: allImageImports,
-    // });
-    // jsx = jsxReplacedCssImages;
-    // Replace and import components
-    const {
-      newJsx: jsxWithComponents,
-      importedComponents,
-    } = await replaceHtmlComponentsInJsx({
-      jsxStr: jsx,
-      componentRegistry,
-      urlResolver,
-      currentPageUrl: page.url,
-    });
-    jsx = jsxWithComponents;
+  // jsx = jsxReplacedHtmlImages;
 
-    jsx = removeTrailingSemicolon(jsx);
+  // const {
+  //   newJsx: jsxReplacedCssImages,
+  //   importedAssets: cssImportedAssets,
+  // } = await replaceInlineStyleSrc({
+  //   jsxStr: jsx,
+  //   assets: allImageImports,
+  // });
+  // jsx = jsxReplacedCssImages;
+  // Replace and import components
+  const {
+    newJsx: jsxWithComponents,
+    importedComponents,
+  } = await replaceHtmlComponentsInJsx({
+    jsxStr: jsx,
+    componentRegistry,
+    urlResolver,
+    currentPageUrl: page.url,
+  });
+  jsx = jsxWithComponents;
 
-    // Correctly create and group imports
-    const scriptImports = createImports({
-      assets: page.assets.filter((asset) => asset.type === 'HtmlScript'),
-      pagesOutFolder,
-      pageFolder: pageFullDirName,
-    });
-    const identifierImports = [
-      // ...htmlImportedAssets,
-      // ...cssImportedAssets,
-      ...scriptImports,
-    ];
-    let allImportedPaths = identifierImports.map(
-      (importedAsset) => importedAsset.path,
-    );
+  jsx = removeTrailingSemicolon(jsx);
 
-    // CSS Imports for the HEAD
-    const cssAssets = page.assets.filter((asset) => asset.type === 'HtmlStyle');
-    const cssLinks = cssAssets
-      .map(
-        (asset) => `<link rel="stylesheet" href="${asset.rootRelativeUrl}" />`,
-      )
-      .join('\n');
+  // Correctly create and group imports
+  const scriptImports = createImports({
+    assets: page.assets.filter((asset) => asset.type === 'HtmlScript'),
+    pagesOutFolder,
+    pageFolder: pageFullDirName,
+  });
+  const identifierImports = [
+    // ...htmlImportedAssets,
+    // ...cssImportedAssets,
+    ...scriptImports,
+  ];
+  let allImportedPaths = identifierImports.map(
+    (importedAsset) => importedAsset.path,
+  );
 
-    allImportedPaths = [
-      ...allImportedPaths,
-      ...cssAssets.map((asset) => asset.path),
-    ];
+  // CSS Imports for the HEAD
+  const cssAssets = page.assets.filter((asset) => asset.type === 'HtmlStyle');
+  const cssLinks = cssAssets
+    .map((asset) => `<link rel="stylesheet" href="${asset.rootRelativeUrl}" />`)
+    .join('\n');
 
-    // Remaining, non-imported assets
-    // WAS used for CSS but now CSS is loaded
-    // from the static folder
-    let nonIdentifierImports = createImports({
-      assets: page.assets.filter(
-        (asset) => !allImportedPaths.includes(asset.path),
-      ),
-      pageFolder: pageFullDirName,
-      pagesOutFolder,
-    });
-    nonIdentifierImports = [];
+  allImportedPaths = [
+    ...allImportedPaths,
+    ...cssAssets.map((asset) => asset.path),
+  ];
 
-    const compatLayerRelativePath = path
-      .relative(pageFullDirName, compatLayerPath)
-      .replace(new RegExp('\\\\', 'g'), '/');
+  // Remaining, non-imported assets
+  // WAS used for CSS but now CSS is loaded
+  // from the static folder
+  let nonIdentifierImports = createImports({
+    assets: page.assets.filter(
+      (asset) => !allImportedPaths.includes(asset.path),
+    ),
+    pageFolder: pageFullDirName,
+    pagesOutFolder,
+  });
+  nonIdentifierImports = [];
 
-    const reactComponentsToImport = importedComponents.map((cmp) => cmp.jsName);
+  const compatLayerRelativePath = path
+    .relative(pageFullDirName, compatLayerPath)
+    .replace(new RegExp('\\\\', 'g'), '/');
 
-    // Create Head JSX
-    jsx = `
+  const reactComponentsToImport = importedComponents.map((cmp) => cmp.jsName);
+
+  // Create Head JSX
+  jsx = `
       <>
         ${ssgConfiguration.createPageHead({
           page,
@@ -185,22 +181,16 @@ export default async function compilePage({
       </>
     `;
 
-    // Build a page React component
-    const componentContent = createReactPageComponent({
-      jsx,
-      identifierImports,
-      nonIdentifierImports,
-      reactComponentName: pageComponentName,
-      compatLayerRelativePath,
-      reactComponentsToImport,
-      ssgSpecificImports: ssgConfiguration.globalPageImports,
-    });
+  // Build a page React component
+  const componentContent = createReactPageComponent({
+    jsx,
+    identifierImports,
+    nonIdentifierImports,
+    reactComponentName: pageComponentName,
+    compatLayerRelativePath,
+    reactComponentsToImport,
+    ssgSpecificImports: ssgConfiguration.globalPageImports,
+  });
 
-    await fsWriteFile(fullFilePath, componentContent);
-  } catch {
-    JamifyLogger.log(
-      'warning',
-      `There was an error compiling the JSX for the page "${pageComponentName}". Please check if the HTML of this page is valid. It is excluded from the conversion process.`,
-    );
-  }
+  await fsWriteFile(fullFilePath, componentContent);
 }
