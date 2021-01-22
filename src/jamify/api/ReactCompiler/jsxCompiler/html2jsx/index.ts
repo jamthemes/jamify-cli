@@ -271,7 +271,7 @@ function isNumeric(input) {
  * - Removes trailing 0s to prevent "Octal literals are not allowed in strict mode"
  */
 function sanitizeNumericValue(value: number | string) {
-  let newValue = value.toString().replace(new RegExp('^0+', 'g'), '');
+  let newValue = parseInt(value.toString(), 10);
   return newValue;
 }
 

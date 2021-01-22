@@ -8,7 +8,6 @@ import { readFileSync } from 'fs';
  * development mode
  */
 export function setupCliContext() {
-  // Set CWD to path of Cantara
   process.chdir(path.join(__dirname, '..', '..'));
 }
 
