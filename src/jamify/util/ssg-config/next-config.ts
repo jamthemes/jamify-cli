@@ -10,11 +10,10 @@ const nextSsgConfig: SsgConfiguration = {
   renderLink: ({ href, children, restAttributes }) => {
     const cmpIndentifier = t.jsxIdentifier('Link');
     const newLinkAttr = t.jsxAttribute(t.jsxIdentifier('href'), href);
-    const allAttributes = [...restAttributes, newLinkAttr];
-    const opening = t.jsxOpeningElement(cmpIndentifier, allAttributes, false);
+    const opening = t.jsxOpeningElement(cmpIndentifier, [newLinkAttr], false);
     const closing = t.jsxClosingElement(cmpIndentifier);
     const aElem = t.jsxElement(
-      t.jsxOpeningElement(t.jsxIdentifier('a'), [], false),
+      t.jsxOpeningElement(t.jsxIdentifier('a'), restAttributes, false),
       t.jsxClosingElement(t.jsxIdentifier('a')),
       children,
       false,
