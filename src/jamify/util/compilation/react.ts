@@ -21,7 +21,11 @@ export function urlToReactComponentName(fullUrl: string) {
   const pageDirName = path.dirname(parsedUrl.pathname || '');
 
   let pageFilePath = `${pageUrlBaseName}.js`;
-  const pageComponentName = camelize(pageUrlBaseName);
+  let pageComponentName = camelize(pageUrlBaseName);
+  const doesComponentNameStartWithNumber = pageComponentName.match(/^\d/);
+  if (doesComponentNameStartWithNumber) {
+    pageComponentName = `P${pageComponentName}`;
+  }
 
   let ssgUrl = `${pageDirName === '/' ? '/' : `${pageDirName}/`}${
     pageUrlBaseName === 'index' ? '' : pageUrlBaseName
