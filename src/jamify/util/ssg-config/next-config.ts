@@ -3,8 +3,8 @@ import { SsgConfiguration } from '../types';
 
 const nextSsgConfig: SsgConfiguration = {
   globalPageImports: [
-    'import Link from "next/Link"',
-    'import Head from "next/Head"',
+    'import Link from "next/link"',
+    'import Head from "next/head"',
   ],
   name: 'next',
   renderLink: ({ href, children, restAttributes }) => {
